@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QfStudio.Godette.ReactiveUI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QfStudio.Godette.ReactiveUI.SourceGenerators", "QfStudio.Godette.ReactiveUI.SourceGenerators\QfStudio.Godette.ReactiveUI.SourceGenerators.csproj", "{7AD97FE6-2767-4DB7-9FE3-590B6E9A3453}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QfStudio.Godette.Tests", "QfStudio.Godette.Tests\QfStudio.Godette.Tests.csproj", "{6DFF4161-57C9-4D13-B8B5-08078B210AAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{7AD97FE6-2767-4DB7-9FE3-590B6E9A3453}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AD97FE6-2767-4DB7-9FE3-590B6E9A3453}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7AD97FE6-2767-4DB7-9FE3-590B6E9A3453}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DFF4161-57C9-4D13-B8B5-08078B210AAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DFF4161-57C9-4D13-B8B5-08078B210AAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DFF4161-57C9-4D13-B8B5-08078B210AAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DFF4161-57C9-4D13-B8B5-08078B210AAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
