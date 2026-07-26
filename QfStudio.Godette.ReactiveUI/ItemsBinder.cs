@@ -58,14 +58,14 @@ public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBa
         node.QueueFree();
     }
 
-    protected override void ReplaceItem(int index, TViewModel viewModel)
+    protected override void ReplaceItem(int index, TViewModel oldViewModel, TViewModel newViewModel)
     {
         if (index < 0 || index >= _nodes.Count)
             return;
 
         var node = _nodes[index];
-        _nodeToViewModel[node] = viewModel;
-        ApplyViewModel(node, viewModel);
+        _nodeToViewModel[node] = newViewModel;
+        ApplyViewModel(node, newViewModel);
     }
 
     protected override void MoveItem(int oldIndex, int newIndex)

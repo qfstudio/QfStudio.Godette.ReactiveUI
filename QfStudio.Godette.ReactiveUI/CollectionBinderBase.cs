@@ -103,12 +103,12 @@ public abstract class CollectionBinderBase<TContainer, TViewModel>
 
     protected virtual void HandleReplace(NotifyCollectionChangedEventArgs e)
     {
-        if (e.NewStartingIndex < 0 || e.NewItems == null)
+        if (e.NewStartingIndex < 0 || e.NewItems == null || e.OldItems == null)
             throw new InvalidOperationException(
-                "Collection replace must provide NewStartingIndex and NewItems; use a collection that supplies indices (e.g. ObservableCollection<T>).");
+                "Collection replace must provide NewStartingIndex and NewItems/OldItems; use a collection that supplies indices (e.g. ObservableCollection<T>).");
 
         for (var i = 0; i < e.NewItems.Count; i++)
-            ReplaceItem(e.NewStartingIndex + i, (TViewModel)e.NewItems[i]!);
+            ReplaceItem(e.NewStartingIndex + i, (TViewModel)e.OldItems[i]!, (TViewModel)e.NewItems[i]!);
     }
 
     protected virtual void HandleMove(NotifyCollectionChangedEventArgs e)
@@ -121,7 +121,7 @@ public abstract class CollectionBinderBase<TContainer, TViewModel>
 
     protected abstract void RemoveItem(int index, TViewModel viewModel);
 
-    protected abstract void ReplaceItem(int index, TViewModel viewModel);
+    protected abstract void ReplaceItem(int index, TViewModel oldViewModel, TViewModel newViewModel);
 
     protected abstract void MoveItem(int oldIndex, int newIndex);
 
