@@ -14,11 +14,6 @@ public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBa
     private readonly List<TNode> _nodes = [];
     private readonly Dictionary<TNode, TViewModel> _nodeToViewModel = new();
 
-    public ItemsBinder() : this(Splat.Locator.Current.GetService<IViewLocator>() ??
-                                throw new InvalidOperationException("IViewLocator is not registered."))
-    {
-    }
-
     public ItemsBinder(IViewLocator viewLocator) : this(() =>
         viewLocator.ResolveView<TViewModel>() as TNode ??
         throw new InvalidOperationException("Cannot resolve view for view model."))

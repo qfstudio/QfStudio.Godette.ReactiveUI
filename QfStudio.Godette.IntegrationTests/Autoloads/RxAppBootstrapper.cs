@@ -19,7 +19,7 @@ public partial class RxAppBootstrapper : Godot.Node
         GodotSchedulers.PhysicsFrameScheduler = _physicsFrameScheduler;
 
         var viewLocator = new GodotViewLocator();
-        viewLocator.RegisterViewsFromAssemblyViaReflection(typeof(RxAppBootstrapper).Assembly, verbose: true);
+        viewLocator.RegisterViewsFromAssemblyViaReflection(typeof(RxAppBootstrapper).Assembly, verbose: false);
 
         RxAppBuilder.CreateReactiveUIBuilder()
             .WithMainThreadScheduler(scheduler)
@@ -30,7 +30,7 @@ public partial class RxAppBootstrapper : Godot.Node
                 locator.RegisterConstant(new GodotPropertyBinder(), typeof(ICreatesObservableForProperty));
                 locator.RegisterConstant(new GodotPollBasedPropertyBinder(), typeof(ICreatesObservableForProperty));
                 locator.RegisterConstant(new GodotCommandBinder(), typeof(ICreatesCommandBinding));
-                locator.RegisterConstant(viewLocator, typeof(IViewLocator));
+                locator.RegisterConstant(viewLocator, typeof(GodotViewLocator));
             })
             .WithCoreServices()
             .BuildApp();
