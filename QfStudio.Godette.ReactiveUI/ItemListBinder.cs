@@ -3,6 +3,7 @@ using Godot;
 
 namespace QfStudio.Godette.ReactiveUI;
 
+// TODO consider exposing the SelectedItem property as a bindable property
 public class ItemListBinder<TViewModel> : CollectionBinderBase<ItemList, TViewModel>
     where TViewModel : class
 {

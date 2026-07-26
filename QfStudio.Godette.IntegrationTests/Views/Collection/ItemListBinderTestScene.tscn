@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://bq1gmskxeqwt0"]
+
+[ext_resource type="Script" uid="uid://qs5mrunol5cd" path="res://Views/Collection/ItemListBinderTestScene.cs" id="1_wt5k0"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_1"]
+font_size = 24
+
+[node name="ItemListBinderTestScene" type="VBoxContainer" unique_id=292587698]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wt5k0")
+
+[node name="BackButton" type="Button" parent="." unique_id=1730961913]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back to Home"
+
+[node name="Title" type="Label" parent="." unique_id=1775443237]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ItemList Binder Tests"
+label_settings = SubResource("LabelSettings_1")
+horizontal_alignment = 1
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=668895340]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MyItemList" type="ItemList" parent="VBox" unique_id=1054235137]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+
+[node name="SelectedLabel" type="Label" parent="VBox" unique_id=1637527327]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Selected: (none)"
+label_settings = SubResource("LabelSettings_1")
+
+[node name="HBox" type="HBoxContainer" parent="VBox" unique_id=1390807965]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AddButton" type="Button" parent="VBox/HBox" unique_id=1245257787]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Add"
+
+[node name="InsertFrontButton" type="Button" parent="VBox/HBox" unique_id=217882177]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Insert Front"
+
+[node name="RemoveButton" type="Button" parent="VBox/HBox" unique_id=1533279371]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Remove"
+
+[node name="ClearButton" type="Button" parent="VBox/HBox" unique_id=2037746972]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear"
+
+[node name="ReplaceButton" type="Button" parent="VBox/HBox" unique_id=1928767883]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Replace"
+
+[node name="MoveButton" type="Button" parent="VBox/HBox" unique_id=1654477849]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Move"
+
+[node name="VerifyMappingButton" type="Button" parent="VBox/HBox" unique_id=2022795953]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Verify Mapping"
