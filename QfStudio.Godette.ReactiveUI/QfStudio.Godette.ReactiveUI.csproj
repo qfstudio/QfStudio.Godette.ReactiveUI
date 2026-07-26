@@ -10,6 +10,9 @@
     <PackageId>QfStudio.Godette.ReactiveUI</PackageId>
     <PackageVersion>1.2-alpha</PackageVersion>
     <Authors>lightyears1998</Authors>
+    <PackageProjectUrl>https://github.com/qfstudio/QfStudio.Godette.ReactiveUI</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/qfstudio/QfStudio.Godette.ReactiveUI.git</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -23,6 +26,10 @@
   <ItemGroup>
     <ProjectReference Include="..\QfStudio.Godette.ReactiveUI.SourceGenerators\QfStudio.Godette.ReactiveUI.SourceGenerators.csproj"
                       ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <Target Name="PackAnalyzer" BeforeTargets="_GetPackageFiles">
