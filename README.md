@@ -1,5 +1,7 @@
 # QfStudio.Godette.ReactiveUI
 
+> ReactiveUI integration for Godot Engine
+
 [ReactiveUI](https://www.reactiveui.net/) is a composable, cross-platform MVVM (Model-View-ViewModel) framework for .NET. It uses reactive extensions to bind UI elements to ViewModel properties and commands, keeping views and business logic cleanly separated.
 
 `QfStudio.Godette.ReactiveUI` provides the platform services that make ReactiveUI work with Godot Engine - scheduling, activation, property-change notification, and command binding. If you have used ReactiveUI with Avalonia or WPF, this is the same `this.Bind` / `this.BindCommand` / `WhenActivated` story, now wired to Godot nodes and signals. See [Developer.md](Docs/Developer.md) for implementation details.
@@ -21,7 +23,7 @@ dotnet add package GodotSharp.SourceGenerators
 ```
 
 <details>
-<summary>With vs Without [SceneTree]</summary>
+<summary>With vs Without <code>[SceneTree]</code></summary>
 
 Provides the `[SceneTree]` attribute. Annotate a `.tscn` root script to get:
 - A `TscnFilePath` static property for type-safe scene loading.
@@ -62,7 +64,7 @@ dotnet add package ReactiveUI.SourceGenerators
 ```
 
 <details>
-<summary>With vs Without [Reactive]</summary>
+<summary>With vs Without <code>[Reactive]</code></summary>
 
 ```csharp
 // With [Reactive]
@@ -549,7 +551,7 @@ this.WhenActivated(d =>
 
 If this library isn't a fit for your needs, consider:
 
-- [**R3**](https://github.com/Cysharp/R3) -- zero-allocation Rx.NET reimplementation by the author of UniRx. Good fit if you prefer `ReactiveProperty` over full MVVM or want frame operators as core. Can run alongside ReactiveUI (e.g. ReactiveUI at UI layer, R3 at business-logic layer).
+- [**R3**](https://github.com/Cysharp/R3) zero-allocation Rx.NET reimplementation by the author of UniRx. Good fit if you prefer `ReactiveProperty` over full MVVM or want frame operators as core. Can run alongside ReactiveUI (e.g. ReactiveUI at UI layer, R3 at business-logic layer).
 
 ---
 
