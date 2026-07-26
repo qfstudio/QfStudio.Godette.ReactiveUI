@@ -11,7 +11,7 @@ In the current version of QfStudio.Godette.ReactiveUI, it is designed to work wi
 ## Installation
 
 ```
-dotnet add package QfStudio.Godette.ReactiveUI
+dotnet add package QfStudio.Godette.ReactiveUI --prerelease
 ```
 
 Two optional but recommended packages improve the development experience:

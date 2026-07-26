@@ -8,9 +8,9 @@
 
   <PropertyGroup>
     <PackageId>QfStudio.Godette.ReactiveUI</PackageId>
-    <PackageVersion>1.2-alpha</PackageVersion>
+    <PackageVersion>1.2-beta</PackageVersion>
     <Authors>lightyears1998</Authors>
-    <Description>ReactiveUI MVVM framework integration for Godot Engine.</Description>
+    <Description>ReactiveUI MVVM framework integration for Godot Engine</Description>
     <PackageTags>godot4;mvvm;reactiveui</PackageTags>
     <PackageProjectUrl>https://github.com/qfstudio/QfStudio.Godette.ReactiveUI</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
