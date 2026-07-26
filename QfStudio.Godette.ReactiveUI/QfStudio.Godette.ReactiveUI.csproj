@@ -10,13 +10,21 @@
     <PackageId>QfStudio.Godette.ReactiveUI</PackageId>
     <PackageVersion>1.2-alpha</PackageVersion>
     <Authors>lightyears1998</Authors>
+    <Description>ReactiveUI MVVM framework integration for Godot Engine.</Description>
+    <PackageTags>godot4;mvvm;reactiveui</PackageTags>
     <PackageProjectUrl>https://github.com/qfstudio/QfStudio.Godette.ReactiveUI</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/qfstudio/QfStudio.Godette.ReactiveUI.git</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <!-- CS1591: Missing XML comment for public members -->
   </PropertyGroup>
 
   <ItemGroup>
