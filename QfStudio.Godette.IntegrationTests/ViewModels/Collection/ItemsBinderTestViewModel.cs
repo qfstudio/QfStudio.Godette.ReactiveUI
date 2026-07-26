@@ -99,7 +99,11 @@ public partial class ItemsBinderTestViewModel : ReactiveObject
             if (Items.Count > 0)
             {
                 var item = Items[0];
-                Items.Add(item);
+                Items.Add(new ItemViewModel(Items)
+                {
+                    Name = item.Name,
+                    Score = item.Score
+                });
                 GD.Print($"[ItemsTest] Duplicated: {item.Name}");
             }
         }, hasItems);

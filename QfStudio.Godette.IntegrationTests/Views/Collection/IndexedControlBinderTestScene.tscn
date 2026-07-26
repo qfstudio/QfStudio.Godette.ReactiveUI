@@ -28,6 +28,7 @@ horizontal_alignment = 1
 [node name="VBox" type="VBoxContainer" parent="." unique_id=552605654]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="TabContainer" type="TabContainer" parent="VBox" unique_id=234492788]
 unique_name_in_owner = true
@@ -89,6 +90,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Add"
 
+[node name="InsertInMiddleButton" type="Button" parent="VBox/HBox" unique_id=2043389709]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Insert Mid"
+
 [node name="RemoveButton" type="Button" parent="VBox/HBox" unique_id=2018504903]
 unique_name_in_owner = true
 layout_mode = 2
@@ -108,6 +114,26 @@ text = "Replace"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Move"
+
+[node name="ChangeTextButton" type="Button" parent="VBox/HBox" unique_id=1999053001]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Change Text"
+
+[node name="ChangeIconButton" type="Button" parent="VBox/HBox" unique_id=1999053002]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Change Icon"
+
+[node name="ChangeSelectedTextButton" type="Button" parent="VBox/HBox" unique_id=1999053003]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Sel Text"
+
+[node name="ChangeSelectedIconButton" type="Button" parent="VBox/HBox" unique_id=1999053004]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Sel Icon"
 
 [node name="VerifyMappingButton" type="Button" parent="VBox/HBox" unique_id=1108968011]
 unique_name_in_owner = true

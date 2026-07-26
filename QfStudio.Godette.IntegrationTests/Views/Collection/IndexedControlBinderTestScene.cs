@@ -12,13 +12,16 @@ namespace QfStudio.Godette.IntegrationTests.Views.Collection;
 public partial class IndexedControlBinderTestScene : Control
 {
     private readonly OptionButtonBinder<IndexedItemViewModel> _optionBinder = new(
-        textSelector: vm => vm.Name);
+        textSelector: vm => vm.Name,
+        iconSelector: vm => vm.Icon);
 
     private readonly TabBarBinder<IndexedItemViewModel> _tabBinder = new(
-        textSelector: vm => vm.Name);
+        textSelector: vm => vm.Name,
+        iconSelector: vm => vm.Icon);
 
     private readonly PopupMenuBinder<IndexedItemViewModel> _popupBinder = new(
-        textSelector: vm => vm.Name);
+        textSelector: vm => vm.Name,
+        iconSelector: vm => vm.Icon);
 
     public IndexedControlBinderTestScene()
     {
@@ -30,7 +33,11 @@ public partial class IndexedControlBinderTestScene : Control
 
             _optionBinder.ObserveSelection()
                 .ObserveOn(RxSchedulers.MainThreadScheduler)
-                .Subscribe(vm => OptionLabel.Text = $"Option: {vm?.Name ?? "(none)"}")
+                .Subscribe(vm =>
+                {
+                    ViewModel!.SelectedItem = vm;
+                    OptionLabel.Text = $"Option: {vm?.Name ?? "(none)"}";
+                })
                 .DisposeWith(d);
 
             _tabBinder.ObserveSelection()
@@ -50,10 +57,15 @@ public partial class IndexedControlBinderTestScene : Control
         ViewModel = new IndexedControlBinderTestViewModel();
 
         AddButton.Pressed += () => ViewModel.AddItemCommand.Execute().Subscribe();
+        InsertInMiddleButton.Pressed += () => ViewModel.InsertInMiddleCommand.Execute().Subscribe();
         RemoveButton.Pressed += () => ViewModel.RemoveItemCommand.Execute().Subscribe();
         ClearButton.Pressed += () => ViewModel.ClearCommand.Execute().Subscribe();
         ReplaceButton.Pressed += () => ViewModel.ReplaceFirstCommand.Execute().Subscribe();
         MoveButton.Pressed += () => ViewModel.MoveCommand.Execute().Subscribe();
+        ChangeTextButton.Pressed += () => ViewModel.ChangeTextCommand.Execute().Subscribe();
+        ChangeIconButton.Pressed += () => ViewModel.ChangeIconCommand.Execute().Subscribe();
+        ChangeSelectedTextButton.Pressed += () => ViewModel.ChangeSelectedTextCommand.Execute().Subscribe();
+        ChangeSelectedIconButton.Pressed += () => ViewModel.ChangeSelectedIconCommand.Execute().Subscribe();
         VerifyMappingButton.Pressed += VerifyMapping;
 
         BackButton.Pressed += () => GetTree().ChangeSceneToFile(HomeScene.TscnFilePath);

@@ -28,11 +28,13 @@ horizontal_alignment = 1
 [node name="VBox" type="VBoxContainer" parent="." unique_id=668895340]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="MyItemList" type="ItemList" parent="VBox" unique_id=1054235137]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="SelectedLabel" type="Label" parent="VBox" unique_id=1637527327]
 unique_name_in_owner = true
