@@ -67,10 +67,38 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Replace First"
 
+[node name="MoveButton" type="Button" parent="VBox/HBoxContainer" unique_id=987654321]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Move"
+
 [node name="VerifyMappingButton" type="Button" parent="VBox/HBoxContainer" unique_id=1232735327]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Verify Mapping"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBox" unique_id=2000111222]
+layout_mode = 2
+
+[node name="RemoveMidButton" type="Button" parent="VBox/HBoxContainer2" unique_id=2000111223]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Remove Mid"
+
+[node name="MoveBackButton" type="Button" parent="VBox/HBoxContainer2" unique_id=2000111224]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Move Back"
+
+[node name="AddRangeButton" type="Button" parent="VBox/HBoxContainer2" unique_id=2000111225]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Add Range"
+
+[node name="RemoveRangeButton" type="Button" parent="VBox/HBoxContainer2" unique_id=2000111226]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Remove Range"
 
 [node name="ItemsContainer" type="VBoxContainer" parent="VBox" unique_id=457836066]
 unique_name_in_owner = true

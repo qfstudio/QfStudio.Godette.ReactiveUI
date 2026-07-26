@@ -1,4 +1,4 @@
-﻿using System.Collections.Specialized;
+using System.Collections.Specialized;
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 
@@ -45,11 +45,11 @@ public abstract class CollectionBinderBase<TContainer, TViewModel>
         return disposable;
     }
 
-    private void PopulateItems()
+    protected void PopulateItems()
     {
         RemoveAllItems();
         foreach (var item in Collection)
-            AddItem(item, -1);
+            AddItem(-1, item);
     }
 
     private void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
@@ -83,7 +83,7 @@ public abstract class CollectionBinderBase<TContainer, TViewModel>
 
         var idx = e.NewStartingIndex;
         foreach (var item in e.NewItems)
-            AddItem((TViewModel)item, idx < 0 ? -1 : idx++);
+            AddItem(idx < 0 ? -1 : idx++, (TViewModel)item);
     }
 
     protected virtual void HandleRemove(NotifyCollectionChangedEventArgs e)
@@ -98,7 +98,7 @@ public abstract class CollectionBinderBase<TContainer, TViewModel>
 
         // Remove from highest to lowest to keep lower indices stable.
         for (var i = e.OldItems.Count - 1; i >= 0; i--)
-            RemoveItem(start + i);
+            RemoveItem(start + i, (TViewModel)e.OldItems[i]!);
     }
 
     protected virtual void HandleReplace(NotifyCollectionChangedEventArgs e)
@@ -117,9 +117,9 @@ public abstract class CollectionBinderBase<TContainer, TViewModel>
     protected virtual void HandleReset()
         => PopulateItems();
 
-    protected abstract void AddItem(TViewModel viewModel, int index);
+    protected abstract void AddItem(int index, TViewModel viewModel);
 
-    protected abstract void RemoveItem(int index);
+    protected abstract void RemoveItem(int index, TViewModel viewModel);
 
     protected abstract void ReplaceItem(int index, TViewModel viewModel);
 

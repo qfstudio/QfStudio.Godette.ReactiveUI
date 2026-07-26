@@ -27,7 +27,7 @@ public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBa
 
     protected Func<TNode> NodeBuilder { get; }
 
-    protected override void AddItem(TViewModel viewModel, int index)
+    protected override void AddItem(int index, TViewModel viewModel)
     {
         var node = NodeBuilder();
         ApplyViewModel(node, viewModel);
@@ -46,7 +46,7 @@ public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBa
         _nodeToViewModel[node] = viewModel;
     }
 
-    protected override void RemoveItem(int index)
+    protected override void RemoveItem(int index, TViewModel viewModel)
     {
         if (index < 0 || index >= _nodes.Count)
             return;

@@ -63,6 +63,11 @@ public partial class ItemsBinderTestViewModel : ReactiveObject
     public ReactiveCommand<Unit, Unit> InsertAtFrontCommand { get; }
     public ReactiveCommand<Unit, Unit> InsertAtMiddleCommand { get; }
     public ReactiveCommand<Unit, Unit> ReplaceFirstCommand { get; }
+    public ReactiveCommand<Unit, Unit> MoveCommand { get; }
+    public ReactiveCommand<Unit, Unit> RemoveAtMiddleCommand { get; }
+    public ReactiveCommand<Unit, Unit> MoveLastToFrontCommand { get; }
+    public ReactiveCommand<Unit, Unit> AddRangeCommand { get; }
+    public ReactiveCommand<Unit, Unit> RemoveRangeCommand { get; }
 
     public ItemsBinderTestViewModel()
     {
@@ -127,8 +132,54 @@ public partial class ItemsBinderTestViewModel : ReactiveObject
                 var old = Items[0];
                 var item = new ItemViewModel(Items) { Name = $"Replaced {old.Name}", Score = old.Score + 1 };
                 Items[0] = item;
-                GD.Print($"[ItemsTest] Replaced first: {old.Name} → {item.Name}");
+                GD.Print($"[ItemsTest] Replaced first: {old.Name} -> {item.Name}");
             }
+        }, hasItems);
+
+        MoveCommand = ReactiveCommand.Create(() =>
+        {
+            if (Items.Count > 1)
+            {
+                var item = Items[0];
+                Items.Move(0, Items.Count - 1);
+                GD.Print($"[ItemsTest] Moved first to last: {item.Name}");
+            }
+        }, hasItems);
+
+        RemoveAtMiddleCommand = ReactiveCommand.Create(() =>
+        {
+            if (Items.Count > 0)
+            {
+                var mid = Items.Count / 2;
+                var item = Items[mid];
+                Items.RemoveAt(mid);
+                GD.Print($"[ItemsTest] Removed at middle ({mid}): {item.Name}");
+            }
+        }, hasItems);
+
+        MoveLastToFrontCommand = ReactiveCommand.Create(() =>
+        {
+            if (Items.Count > 1)
+            {
+                var item = Items[^1];
+                Items.Move(Items.Count - 1, 0);
+                GD.Print($"[ItemsTest] Moved last to front: {item.Name}");
+            }
+        }, hasItems);
+
+        AddRangeCommand = ReactiveCommand.Create(() =>
+        {
+            for (int i = 0; i < 3; i++)
+                Items.Add(new ItemViewModel(Items) { Name = $"Batch {Items.Count + 1}", Score = 0 });
+            GD.Print("[ItemsTest] Added 3 items");
+        });
+
+        RemoveRangeCommand = ReactiveCommand.Create(() =>
+        {
+            var count = Math.Min(2, Items.Count);
+            for (int i = 0; i < count; i++)
+                Items.RemoveAt(Items.Count - 1);
+            GD.Print($"[ItemsTest] Removed {count} items");
         }, hasItems);
     }
 }

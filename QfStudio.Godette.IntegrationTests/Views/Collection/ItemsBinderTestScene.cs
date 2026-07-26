@@ -11,7 +11,7 @@ namespace QfStudio.Godette.IntegrationTests.Views.Collection;
 public partial class ItemsBinderTestScene : Control
 {
     private readonly ItemsBinder<VBoxContainer, ItemLabel, ItemViewModel> _itemsBinder =
-        new(() => GD.Load<PackedScene>(ItemLabel.TscnFilePath).Instantiate<ItemLabel>());
+        new(Splat.Locator.Current.GetService<GodotViewLocator>()!);
 
     public ItemsBinderTestScene()
     {
@@ -39,6 +39,21 @@ public partial class ItemsBinderTestScene : Control
                 .DisposeWith(d);
 
             this.BindCommand(ViewModel, vm => vm.ReplaceFirstCommand, v => v.ReplaceFirstButton)
+                .DisposeWith(d);
+
+            this.BindCommand(ViewModel, vm => vm.MoveCommand, v => v.MoveButton)
+                .DisposeWith(d);
+
+            this.BindCommand(ViewModel, vm => vm.RemoveAtMiddleCommand, v => v.RemoveMidButton)
+                .DisposeWith(d);
+
+            this.BindCommand(ViewModel, vm => vm.MoveLastToFrontCommand, v => v.MoveBackButton)
+                .DisposeWith(d);
+
+            this.BindCommand(ViewModel, vm => vm.AddRangeCommand, v => v.AddRangeButton)
+                .DisposeWith(d);
+
+            this.BindCommand(ViewModel, vm => vm.RemoveRangeCommand, v => v.RemoveRangeButton)
                 .DisposeWith(d);
         });
     }
