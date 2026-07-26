@@ -78,20 +78,20 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Polling-based Data Binding Tests"
 
-[node name="CollectionButton" type="Button" parent="VBox" unique_id=1645994036]
+[node name="ItemsBinderButton" type="Button" parent="VBox" unique_id=1645994036]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Collection Tests"
+text = "ItemsBinder Tests"
 
 [node name="ItemListButton" type="Button" parent="VBox" unique_id=1053494583]
 unique_name_in_owner = true
 layout_mode = 2
 text = "ItemList Binder Tests"
 
-[node name="ItemBinderButton" type="Button" parent="VBox" unique_id=752634452]
+[node name="IndexedItemBinderButton" type="Button" parent="VBox" unique_id=752634452]
 unique_name_in_owner = true
 layout_mode = 2
-text = "ItemBinder Tests (Option/Tab/Popup/Tree)"
+text = "IndexedItemBinder Tests (Option/Tab/Popup/Tree)"
 
 [node name="ValidationButton" type="Button" parent="VBox" unique_id=1313219971]
 unique_name_in_owner = true

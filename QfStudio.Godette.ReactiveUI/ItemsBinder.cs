@@ -1,162 +1,118 @@
-using System.Collections.Specialized;
-using System.Reactive.Disposables;
-using System.Reactive.Disposables.Fluent;
 using ReactiveUI;
 
 namespace QfStudio.Godette.ReactiveUI;
 
 /// <summary>
-/// Binds an <see cref="ObservableCollection{TViewModel}"/> to a Godot container by creating and
-/// managing child nodes via <see cref="ItemBuilder"/>.
-///
-/// Usage: call <see cref="Connect"/> in <c>WhenActivated</c> and dispose the result with the activation composite.
-/// Disposing removes all nodes created by this binder. Other nodes already in the container are not affected.
+/// Binds an <see cref="IList{TViewModel}"/> to a Godot container by creating and
+/// managing child nodes via <see cref="NodeBuilder"/>.
 /// </summary>
-public class ItemsBinder<TContainerNode, TNode, TViewModel>
+public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBase<TContainerNode, TViewModel>
     where TContainerNode : Godot.Node
     where TNode : Godot.Node
     where TViewModel : class
 {
-    private CompositeDisposable? _disposable;
+    private readonly List<TNode> _nodes = [];
     private readonly Dictionary<TNode, TViewModel> _nodeToViewModel = new();
-    private readonly Dictionary<TViewModel, TNode> _viewModelToNode = new();
 
-    public ItemsBinder(Func<TNode> itemBuilder) { ItemBuilder = itemBuilder; }
-
-    public bool IsConnected { get; protected set; }
-    public Func<TNode> ItemBuilder { get; protected set; }
-
-    public IDisposable Connect(TContainerNode container, IEnumerable<TViewModel> collection)
+    public ItemsBinder() : this(Splat.Locator.Current.GetService<IViewLocator>() ??
+                                throw new InvalidOperationException("IViewLocator is not registered."))
     {
-        if (IsConnected) throw new InvalidOperationException("Already connected");
-
-        _disposable = new CompositeDisposable();
-        IsConnected = true;
-        Disposable.Create(() => IsConnected = false).DisposeWith(_disposable);
-
-        AddInitialItems(container, collection);
-
-        if (collection is INotifyCollectionChanged notifyCollection)
-        {
-            NotifyCollectionChangedEventHandler handler = (s, e) => OnCollectionChanged(container, e);
-            notifyCollection.CollectionChanged += handler;
-            Disposable.Create(() => notifyCollection.CollectionChanged -= handler)
-                .DisposeWith(_disposable);
-        }
-
-        // Remove all managed nodes on dispose.
-        Disposable.Create(() => HandleReset(container)).DisposeWith(_disposable);
-
-        return _disposable;
     }
 
-    protected virtual void AddInitialItems(TContainerNode container, IEnumerable<TViewModel> items)
+    public ItemsBinder(IViewLocator viewLocator) : this(() =>
+        viewLocator.ResolveView<TViewModel>() as TNode ??
+        throw new InvalidOperationException("Cannot resolve view for view model."))
     {
-        foreach (var item in items)
-            AddNode(container, item);
     }
 
-    protected virtual void OnCollectionChanged(TContainerNode container, NotifyCollectionChangedEventArgs e)
+    public ItemsBinder(Func<TNode> nodeBuilder)
     {
-        switch (e.Action)
-        {
-            case NotifyCollectionChangedAction.Add:
-                HandleAdd(container, e);
-                break;
-            case NotifyCollectionChangedAction.Remove:
-                HandleRemove(container, e);
-                break;
-            case NotifyCollectionChangedAction.Replace:
-                HandleReplace(container, e);
-                break;
-            case NotifyCollectionChangedAction.Move:
-                HandleMove(container, e);
-                break;
-            case NotifyCollectionChangedAction.Reset:
-                HandleReset(container);
-                break;
-        }
+        NodeBuilder = nodeBuilder;
     }
 
-    protected virtual void HandleAdd(TContainerNode container, NotifyCollectionChangedEventArgs e)
-    {
-        var idx = e.NewStartingIndex;
-        foreach (var item in e.NewItems!)
-            AddNode(container, (TViewModel)item, idx++);
-    }
+    protected Func<TNode> NodeBuilder { get; }
 
-    protected virtual void HandleRemove(TContainerNode container, NotifyCollectionChangedEventArgs e)
+    protected override void AddItem(TViewModel viewModel, int index)
     {
-        foreach (var item in e.OldItems!)
-        {
-            if (_viewModelToNode.TryGetValue((TViewModel)item, out var node))
-                RemoveNode(container, node);
-        }
-    }
-
-    protected virtual void HandleReplace(TContainerNode container, NotifyCollectionChangedEventArgs e)
-    {
-        var node = (TNode)container.GetChildren()[e.OldStartingIndex];
-        var newViewModel = (TViewModel)e.NewItems![0]!;
-        var oldViewModel = _nodeToViewModel[node];
-        _nodeToViewModel[node] = newViewModel;
-        _viewModelToNode.Remove(oldViewModel);
-        _viewModelToNode[newViewModel] = node;
-        ApplyViewModel(node, newViewModel);
-    }
-
-    protected virtual void HandleMove(TContainerNode container, NotifyCollectionChangedEventArgs e)
-    {
-        var node = (TNode)container.GetChildren()[e.OldStartingIndex];
-        container.MoveChild(node, e.NewStartingIndex);
-    }
-
-    protected virtual void HandleReset(TContainerNode container)
-    {
-        foreach (var node in _nodeToViewModel.Keys.ToList())
-        {
-            container.RemoveChild(node);
-            node.QueueFree();
-        }
-        _nodeToViewModel.Clear();
-        _viewModelToNode.Clear();
-    }
-
-    protected virtual void AddNode(TContainerNode container, TViewModel viewModel, int index = -1)
-    {
-        var node = ItemBuilder();
+        var node = NodeBuilder();
         ApplyViewModel(node, viewModel);
+
+        Container.AddChild(node);
+        if (index >= 0 && index < _nodes.Count)
+        {
+            Container.MoveChild(node, index);
+            _nodes.Insert(index, node);
+        }
+        else
+        {
+            _nodes.Add(node);
+        }
+
         _nodeToViewModel[node] = viewModel;
-        _viewModelToNode[viewModel] = node;
-        container.AddChild(node);
-        if (index >= 0) container.MoveChild(node, index);
     }
 
-    protected virtual void RemoveNode(TContainerNode container, TNode node)
+    protected override void RemoveItem(int index)
     {
-        if (_nodeToViewModel.Remove(node, out var viewModel))
-        {
-            _viewModelToNode.Remove(viewModel);
-        }
-        container.RemoveChild(node);
+        if (index < 0 || index >= _nodes.Count)
+            return;
+
+        var node = _nodes[index];
+        _nodes.RemoveAt(index);
+        _nodeToViewModel.Remove(node);
+        Container.RemoveChild(node);
         node.QueueFree();
     }
 
-    protected virtual TNode? GetNode(TViewModel viewModel)
+    protected override void ReplaceItem(int index, TViewModel viewModel)
     {
-        return _viewModelToNode.GetValueOrDefault(viewModel);
+        if (index < 0 || index >= _nodes.Count)
+            return;
+
+        var node = _nodes[index];
+        _nodeToViewModel[node] = viewModel;
+        ApplyViewModel(node, viewModel);
     }
 
-    protected virtual TViewModel? GetViewModel(TNode node)
+    protected override void MoveItem(int oldIndex, int newIndex)
     {
-        return _nodeToViewModel.GetValueOrDefault(node);
+        if (oldIndex < 0 || oldIndex >= _nodes.Count)
+            return;
+        var newClamped = Math.Clamp(newIndex, 0, _nodes.Count - 1);
+
+        var node = _nodes[oldIndex];
+        _nodes.RemoveAt(oldIndex);
+        Container.MoveChild(node, newClamped);
+        _nodes.Insert(newClamped, node);
     }
+
+    protected override void RemoveAllItems()
+    {
+        foreach (var node in Container.GetChildren())
+        {
+            Container.RemoveChild(node);
+            node.QueueFree();
+        }
+        _nodes.Clear();
+        _nodeToViewModel.Clear();
+    }
+
+    public List<TNode> GetNodesForViewModel(TViewModel viewModel)
+    {
+        var ret = new List<TNode>();
+        foreach (var node in _nodes)
+            if (_nodeToViewModel.TryGetValue(node, out var vm) && ReferenceEquals(vm, viewModel))
+                ret.Add(node);
+        return ret;
+    }
+
+    public TViewModel? GetViewModelOfNode(TNode node) =>
+        _nodeToViewModel.GetValueOrDefault(node);
 
     protected virtual void ApplyViewModel(TNode node, TViewModel viewModel)
     {
-        if (node is IViewFor<TViewModel> viewFor)
+        if (node is IViewFor<TViewModel> view)
         {
-            viewFor.ViewModel = viewModel;
+            view.ViewModel = viewModel;
         }
         else
         {

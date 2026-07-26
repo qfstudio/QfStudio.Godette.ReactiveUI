@@ -15,9 +15,9 @@ public partial class HomeScene : Control
         RoutingButton.Pressed += () => GetTree().ChangeSceneToFile(Routing.RoutingDemoScene.TscnFilePath);
         FrameOperatorsButton.Pressed += () => GetTree().ChangeSceneToFile(FrameOperators.FrameOperatorsTestScene.TscnFilePath);
         PollingBindingButton.Pressed += () => GetTree().ChangeSceneToFile(PollingBinding.PollingBindingTestScene.TscnFilePath);
-        CollectionButton.Pressed += () => GetTree().ChangeSceneToFile("res://Views/Collection/ItemsTestScene.tscn");
+        ItemsBinderButton.Pressed += () => GetTree().ChangeSceneToFile(Collection.ItemsBinderTestScene.TscnFilePath);
         ItemListButton.Pressed += () => GetTree().ChangeSceneToFile("res://Views/Collection/ItemListTestScene.tscn");
-        ItemBinderButton.Pressed += () => GetTree().ChangeSceneToFile("res://Views/Collection/ItemBinderTestScene.tscn");
+        IndexedItemBinderButton.Pressed += () => GetTree().ChangeSceneToFile("res://Views/Collection/IndexedItemBinderTestScene.tscn");
         ValidationButton.Pressed += () => GetTree().ChangeSceneToFile(Validation.ValidationTestScene.TscnFilePath);
         MiscButton.Pressed += () => GetTree().ChangeSceneToFile(Misc.MiscTestScene.TscnFilePath);
         ExitButton.Pressed += Exit;
