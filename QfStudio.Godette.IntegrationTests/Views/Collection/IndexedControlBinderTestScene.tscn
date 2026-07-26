@@ -1,0 +1,115 @@
+[gd_scene format=3 uid="uid://c0qv4ja7fsj7t"]
+
+[ext_resource type="Script" uid="uid://wdntwqedm0e7" path="res://Views/Collection/IndexedControlBinderTestScene.cs" id="1_binders"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_1"]
+font_size = 24
+
+[node name="IndexedControlBinderTestScene" type="VBoxContainer" unique_id=1427676959]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_binders")
+
+[node name="BackButton" type="Button" parent="." unique_id=1496648798]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back to Home"
+
+[node name="Title" type="Label" parent="." unique_id=887270625]
+unique_name_in_owner = true
+layout_mode = 2
+text = "IndexedControlBinder Tests (OptionButton / TabBar / PopupMenu)"
+label_settings = SubResource("LabelSettings_1")
+horizontal_alignment = 1
+
+[node name="VBox" type="VBoxContainer" parent="." unique_id=552605654]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TabContainer" type="TabContainer" parent="VBox" unique_id=234492788]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="OptionButton" type="VBoxContainer" parent="VBox/TabContainer" unique_id=697823726]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="OptionSelect" type="OptionButton" parent="VBox/TabContainer/OptionButton" unique_id=900999494]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="OptionLabel" type="Label" parent="VBox/TabContainer/OptionButton" unique_id=1908824401]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Option: (none)"
+label_settings = SubResource("LabelSettings_1")
+
+[node name="TabBar" type="VBoxContainer" parent="VBox/TabContainer" unique_id=1142562091]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="TabBarSelect" type="TabBar" parent="VBox/TabContainer/TabBar" unique_id=460960973]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TabLabel" type="Label" parent="VBox/TabContainer/TabBar" unique_id=208767111]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Tab: (none)"
+label_settings = SubResource("LabelSettings_1")
+
+[node name="PopupMenu" type="VBoxContainer" parent="VBox/TabContainer" unique_id=334105382]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="MenuButtonSelect" type="MenuButton" parent="VBox/TabContainer/PopupMenu" unique_id=673562754]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Click to open PopupMenu"
+
+[node name="PopupLabel" type="Label" parent="VBox/TabContainer/PopupMenu" unique_id=1880393936]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Popup: (none)"
+label_settings = SubResource("LabelSettings_1")
+
+[node name="HBox" type="HBoxContainer" parent="VBox" unique_id=1226363965]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="AddButton" type="Button" parent="VBox/HBox" unique_id=2043389708]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Add"
+
+[node name="RemoveButton" type="Button" parent="VBox/HBox" unique_id=2018504903]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Remove"
+
+[node name="ClearButton" type="Button" parent="VBox/HBox" unique_id=1680984850]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear"
+
+[node name="ReplaceButton" type="Button" parent="VBox/HBox" unique_id=323539380]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Replace"
+
+[node name="MoveButton" type="Button" parent="VBox/HBox" unique_id=1884744498]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Move"
+
+[node name="VerifyMappingButton" type="Button" parent="VBox/HBox" unique_id=1108968011]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Verify Mapping"

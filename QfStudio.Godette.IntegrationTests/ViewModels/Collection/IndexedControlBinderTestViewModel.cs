@@ -1,40 +1,31 @@
-using System;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using ReactiveUI;
+using ReactiveUI.SourceGenerators;
 
 namespace QfStudio.Godette.IntegrationTests.ViewModels.Collection;
 
-public class ItemBinderTestItemViewModel : ReactiveObject
+public partial class IndexedItemViewModel : ViewModelBase
 {
-    private string _name = "";
+    public IndexedItemViewModel(string name) => Name = name;
 
-    public ItemBinderTestItemViewModel(string name) => Name = name;
-
-    public string Name
-    {
-        get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
-    }
-
-    public ObservableCollection<ItemBinderTestItemViewModel> Children { get; } = new();
+    [Reactive]
+    public partial string Name { get; set; }
 }
 
-public class ItemBinderTestViewModel : ReactiveObject
+public class IndexedControlBinderTestViewModel : ViewModelBase
 {
-    private int _counter;
-
-    public ItemBinderTestViewModel()
+    public IndexedControlBinderTestViewModel()
     {
-        Items.Add(new ItemBinderTestItemViewModel("Alpha"));
-        Items.Add(new ItemBinderTestItemViewModel("Beta"));
-        Items.Add(new ItemBinderTestItemViewModel("Gamma"));
-        _counter = 3;
+        Items.Add(new IndexedItemViewModel("Alpha"));
+        Items.Add(new IndexedItemViewModel("Beta"));
+        Items.Add(new IndexedItemViewModel("Gamma"));
+        var counter = 3;
 
         AddItemCommand = ReactiveCommand.Create(() =>
         {
-            _counter++;
-            Items.Add(new ItemBinderTestItemViewModel($"Item {_counter}"));
+            counter++;
+            Items.Add(new IndexedItemViewModel($"Item {counter}"));
         });
 
         RemoveItemCommand = ReactiveCommand.Create(() =>
@@ -48,7 +39,7 @@ public class ItemBinderTestViewModel : ReactiveObject
         ReplaceFirstCommand = ReactiveCommand.Create(() =>
         {
             if (Items.Count > 0)
-                Items[0] = new ItemBinderTestItemViewModel("Replaced " + DateTime.Now.Ticks);
+                Items[0] = new IndexedItemViewModel("Replaced " + DateTime.Now.Ticks);
         });
 
         MoveCommand = ReactiveCommand.Create(() =>
@@ -58,7 +49,7 @@ public class ItemBinderTestViewModel : ReactiveObject
         });
     }
 
-    public ObservableCollection<ItemBinderTestItemViewModel> Items { get; } = new();
+    public ObservableCollection<IndexedItemViewModel> Items { get; } = [];
 
     public ReactiveCommand<Unit, Unit> AddItemCommand { get; }
     public ReactiveCommand<Unit, Unit> RemoveItemCommand { get; }

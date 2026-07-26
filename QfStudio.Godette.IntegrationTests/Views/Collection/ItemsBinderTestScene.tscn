@@ -28,6 +28,7 @@ horizontal_alignment = 1
 [node name="VBox" type="VBoxContainer" parent="." unique_id=1568449396]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBox" unique_id=1345818953]
 layout_mode = 2
