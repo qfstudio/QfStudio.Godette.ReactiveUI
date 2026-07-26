@@ -206,12 +206,16 @@ public partial class MyScene : Control
 }
 ```
 
-**Why assign `ViewModel` in `_Ready`?**
+<details>
+<summary>Why assign <code>ViewModel</code> in <code>_Ready</code>?</summary>
+
 In Godot there is **no built-in UI/routing framework** that creates views and injects their `ViewModel` for you. Unlike Avalonia + ReactiveUI, where `RoutingState` and the platform's `IViewLocator` (resolved via DataTemplates / Splat) typically construct the View and set `ViewModel` for you during navigation, in Godot each scene's root script must instantiate its own ViewModel at some point. The recommended place is `_Ready`, because:
 - Godot guarantees `_Ready` is called after all children are initialized, so `[SceneTree]`-generated node properties (e.g. `NameEdit`) are non-null here;
 - Godot's C# virtual `_Ready` runs **before** the `Ready` signal is emitted, and `WhenActivated` subscribes to the `Ready` signal via `GodotActivationFetcher`, so `_Ready`'s `ViewModel = new MyViewModel();` completes before the `WhenActivated` callback fires.
 
 If you wire navigation yourself (see [Routing](#routing) below), the `RoutedViewController` sets `view.ViewModel = viewModel` after resolving the view, so you don't need `_Ready` assignment for routed views -- only for top-level/root scenes.
+
+</details>
 
 ### Data Binding
 
@@ -322,13 +326,7 @@ this.WhenActivated(d =>
 
 ### Collection Binding
 
-Synchronize an `ObservableCollection<TViewModel>` to a Godot container. `ItemsBinder` maps ViewModels to child nodes; `ItemListBinder`, `OptionButtonBinder`, `TabBarBinder`, `PopupMenuBinder`, and `TreeBinder` (with optional `childrenSelector` for hierarchy) bind to their respective controls.
-
-**Why a Binder instead of an ItemsControl?** In Avalonia/WPF, collection synchronization is built into the templating stack: you bind `ItemsControl.ItemsSource` and the framework's `ItemContainerGenerator` creates a container per item, applies the `DataTemplate`, and wires `DataContext`. Godot has no XAML/template engine and no `ItemsSource` property -- its `VBoxContainer`, `ItemList`, `OptionButton`, `Tree`, etc. are heterogeneous controls with completely different add/remove APIs (`AddChild`, `AddItem`, `AddItem`+`set_metadata`, `CreateItem`...). There is no shared "item generator" the binding layer can hook into.
-
-The `*Binder` types fill that gap. Each binder encapsulates the control-specific add/remove/replace/move logic for one Godot control family and exposes a uniform `Connect(container, collection)` API. This keeps the view-side code declarative (the same shape as `WhenActivated` + `DisposeWith(d)` used elsewhere in ReactiveUI) while staying a thin adapter over Godot's native APIs -- no shadow visual tree, no intermediate "items host" node, no allocation-heavy template expansion. The trade-off is that you pick the binder matching your control (`ItemsBinder` for node containers, `ItemListBinder` for `ItemList`, `TreeBinder` for `Tree`, ...), rather than one universal `ItemsControl`.
-
-A second reason is structural: an Avalonia-style `ItemsControl<T>` would have to derive from a Godot control (`Godot.Node`), but Godot treats every `Godot.Node`-derived C# class as a script resource tied to a unique path inside the Godot project's source directory, and it does **not** support generic `Godot.Node` types at all (see [Developer.md § Limitations for Godot](../Docs/Developer.md#limitations-for-godot)). A reusable, generic collection host therefore cannot live in a third-party assembly nor be typed per item. The binder sidesteps both constraints -- it is a plain, generic C# class that drives an *existing* Godot control through a `Connect(container, ...)` call, which is exactly why it ships in this library while a generic `ItemsControl<TNode, TView, TViewModel>` cannot.
+Synchronize an `ObservableCollection<TViewModel>` to a Godot container. `ItemsBinder` maps ViewModels to child nodes; `ItemListBinder`, `OptionButtonBinder`, `TabBarBinder`, and `PopupMenuBinder` bind to their respective controls.
 
 ```csharp
 // Node container: ObservableCollection<ItemViewModel> -> VBoxContainer children
@@ -363,21 +361,20 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
-// Tree with hierarchy (childrenSelector drives nested rows)
-var treeBinder = new TreeBinder<TreeNodeViewModel>(
-    childrenSelector: vm => vm.Children,
-    textSelector: vm => vm.Name);
-this.WhenActivated(d =>
-{
-    treeBinder.Connect(treeControl, rootItems)
-        .DisposeWith(d);
-    treeBinder.ObserveSelection()
-        .Subscribe(vm => { /* handle selection */ })
-        .DisposeWith(d);
-});
 ```
 
 `Connect(...)` returns an `IDisposable` that detaches the binder from the container and the collection. Always dispose it (typically via `DisposeWith(d)` inside `WhenActivated`) so cleanup happens on deactivation.
+
+<details>
+<summary>Why a Binder instead of an <code>ItemsControl</code>?</summary>
+
+In Avalonia/WPF, collection synchronization is built into the templating stack: you bind `ItemsControl.ItemsSource` and the framework's `ItemContainerGenerator` creates a container per item, applies the `DataTemplate`, and wires `DataContext`. Godot has no XAML/template engine and no `ItemsSource` property -- its `VBoxContainer`, `ItemList`, `OptionButton`, `Tree`, etc. are heterogeneous controls with completely different add/remove APIs (`AddChild`, `AddItem`, `AddItem`+`set_metadata`, `CreateItem`...). There is no shared "item generator" the binding layer can hook into.
+
+The `*Binder` types fill that gap. Each binder encapsulates the control-specific add/remove/replace/move logic for one Godot control family and exposes a uniform `Connect(container, collection)` API. This keeps the view-side code declarative (the same shape as `WhenActivated` + `DisposeWith(d)` used elsewhere in ReactiveUI) while staying a thin adapter over Godot's native APIs -- no shadow visual tree, no intermediate "items host" node, no allocation-heavy template expansion. The trade-off is that you pick the binder matching your control (`ItemsBinder` for node containers, `ItemListBinder` for `ItemList`, ...), rather than one universal `ItemsControl`.
+
+A second reason is structural: an Avalonia-style `ItemsControl<T>` would have to derive from a Godot control (`Godot.Node`), but Godot treats every `Godot.Node`-derived C# class as a script resource tied to a unique path inside the Godot project's source directory, and it does **not** support generic `Godot.Node` types at all (see [Developer.md § Limitations for Godot](../Docs/Developer.md#limitations-for-godot)). A reusable, generic collection host therefore cannot live in a third-party assembly nor be typed per item. The binder sidesteps both constraints -- it is a plain, generic C# class that drives an *existing* Godot control through a `Connect(container, ...)` call, which is exactly why it ships in this library while a generic `ItemsControl<TNode, TView, TViewModel>` cannot.
+
+</details>
 
 ### Interaction
 
