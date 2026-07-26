@@ -93,11 +93,6 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "IndexedControlBinder Tests (Option/Tab/Popup)"
 
-[node name="TreeBinderButton" type="Button" parent="VBox" unique_id=-1294967295]
-unique_name_in_owner = true
-layout_mode = 2
-text = "TreeBinder Tests"
-
 [node name="ValidationButton" type="Button" parent="VBox" unique_id=1313219971]
 unique_name_in_owner = true
 layout_mode = 2
