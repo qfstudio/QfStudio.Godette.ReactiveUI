@@ -108,15 +108,15 @@ public partial class RxAppBootstrapper : Godot.Node
     public RxAppBootstrapper()
     {
         var scheduler = GodotMainThreadScheduler.Create(SynchronizationContext.Current!);
-        GodotSchedulers.MainThreadScheduler = scheduler;              // used by Godot-specific APIs (e.g. frame operators)
-        GodotSchedulers.ProcessFrameScheduler = _processFrameScheduler;
+        GodotSchedulers.MainThreadScheduler = scheduler;              
+        GodotSchedulers.ProcessFrameScheduler = _processFrameScheduler; 
         GodotSchedulers.PhysicsFrameScheduler = _physicsFrameScheduler;
 
         var viewLocator = new GodotViewLocator();
         viewLocator.RegisterViewsFromAssemblyViaReflection(typeof(RxAppBootstrapper).Assembly, verbose: false);
 
         RxAppBuilder.CreateReactiveUIBuilder()
-            .WithMainThreadScheduler(scheduler)   // also exposes scheduler as RxSchedulers.MainThreadScheduler after BuildApp()
+            .WithMainThreadScheduler(scheduler) 
             .WithRegistration(locator =>
             {
                 locator.RegisterConstant(new GodotActivationFetcher(), typeof(IActivationForViewFetcher));
@@ -143,11 +143,11 @@ public partial class RxAppBootstrapper : Godot.Node
 }
 ```
 
+In Godot Editor, go to **Project > Project Settings > Autoload** and add this script as an Autoload with a name like `RxAppBootstrapper`.
+
 `RxAppBuilder.BuildApp()` mirrors the scheduler registered via `.WithMainThreadScheduler(...)` into ReactiveUI's `RxSchedulers.MainThreadScheduler`, so `ObserveOn(RxSchedulers.MainThreadScheduler)` (used in the examples below) resolves to the same `GodotMainThreadScheduler` set up here. `GodotSchedulers` is the Godot-side alias for the same instances, used by frame operators and other Godot-specific APIs.
 
 Without the `FloatToDoubleConverter`/`DoubleToFloatConverter` shown above, bindings between Godot controls that expose `double` properties (e.g. `Range.Value`, `ColorPicker.Color`) and ViewModel `float` properties will throw `ConverterNotFoundException` at bind time. The library also ships `EnumToStringConverter<TEnum>`, `StringToEnumConverter<TEnum>`, and `Variant`-to/from-primitive converters -- register whichever ones you need via `.WithConverter(...)` in the builder above.
-
-In Godot Editor, go to **Project > Project Settings > Autoload** and add this script as an Autoload with a name like `RxAppBootstrapper`.
 
 ## Usage
 
@@ -265,6 +265,31 @@ this.WhenActivated(d =>
 });
 ```
 
+<details>
+<summary>How it works</summary>
+
+Two binders cooperate to deliver property-change notifications:
+
+**`GodotPropertyBinder` -- signal-based**
+Subscribes to built-in Godot signals so changes arrive instantly with no frame delay:
+
+| Control type | Property | Godot signal |
+|---|---|---|
+| `Range` | `Value` | `ValueChanged` |
+| `LineEdit` | `Text` | `TextChanged` |
+| `TextEdit` | `Text` | `TextChanged` |
+| `BaseButton` | `ButtonPressed` | `Toggled` |
+| `TabContainer` | `CurrentTab` | `TabChanged` |
+| `TabBar` | `CurrentTab` | `TabChanged` |
+| `OptionButton` | `Selected` | `ItemSelected` |
+| `ColorPicker` | `Color` | `ColorChanged` |
+| `ColorPickerButton` | `Color` | `ColorChanged` |
+
+**`GodotPollBasedPropertyBinder` — per-frame polling**
+For any `GodotObject` property that does not have a dedicated signal, the binder reads the value every frame via `Observable.PollEveryUpdate` and emits when the value changes. Because it relies on polling, there is at most one frame of latency.
+
+</details>
+
 ### Activation Lifecycle
 
 When a view is activated (entering the scene tree and ready), `WhenActivated` fires. All subscriptions registered via `DisposeWith(d)` are cleaned up on deactivation:
@@ -363,7 +388,9 @@ this.WhenActivated(d =>
 
 ```
 
-`Connect(...)` returns an `IDisposable` that detaches the binder from the container and the collection. Always dispose it (typically via `DisposeWith(d)` inside `WhenActivated`) so cleanup happens on deactivation.
+`Connect(...)` returns an `IDisposable` that detaches the binder from the container and the collection. Always dispose it (typically via `DisposeWith(...)` inside `WhenActivated`) so cleanup happens on deactivation.
+
+The index binders (`ItemListBinder`, `OptionButtonBinder`, `TabBarBinder`, `PopupMenuBinder`) accept `Expression<Func<TViewModel, string?>>` / `Expression<Func<TViewModel, Texture2D?>>` selectors. When `TViewModel` implements `INotifyPropertyChanged` (e.g. inherits `ReactiveObject`), the binder subscribes via ReactiveUI's `WhenAnyValue` and keeps the control's text/icon in sync as the VM's `[Reactive]` properties change. POCO view models that do not implement `INotifyPropertyChanged` only get the initial value written at add/replace time; subsequent property changes will not propagate.
 
 <details>
 <summary>Why a Binder instead of an <code>ItemsControl</code>?</summary>
