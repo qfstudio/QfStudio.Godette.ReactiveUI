@@ -18,6 +18,9 @@ public class GodotMainThreadScheduler : IScheduler
 
     public IDisposable Schedule<TState>(TState state, Func<IScheduler, TState, IDisposable> action)
     {
+        if (ReferenceEquals(SynchronizationContext.Current, _context))
+            return action(this, state);
+
         var disposable = new SingleAssignmentDisposable();
 
         _context.Post(_ =>
