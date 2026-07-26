@@ -1,21 +1,10 @@
 # QfStudio.Godette.ReactiveUI
 
-`QfStudio.Godette.ReactiveUI` provides [ReactiveUI](https://www.reactiveui.net/) integration for Godot Engine.
+[ReactiveUI](https://www.reactiveui.net/) is a composable, cross-platform MVVM (Model-View-ViewModel) framework for .NET. It uses reactive extensions to bind UI elements to ViewModel properties and commands, keeping views and business logic cleanly separated.
 
-`QfStudio.Godette.ReactiveUI` implements ReactiveUI platform services for Godot Engine.
+`QfStudio.Godette.ReactiveUI` provides the platform services that make ReactiveUI work with Godot Engine - scheduling, activation, property-change notification, and command binding. See [Developer.md](Docs/Developer.md) for implementation details.
 
-ReactiveUI is an open-source, composable MVVM (Model-View-ViewModel) framework for .NET platforms.
-
-Generally, it takes 4 steps to implement `ReactiveUI` for a custom platform.
-
-- Implement `IScheduler` for the UI thread.
-- Implement `IActivationForViewFetcher` for view activation.
-- Implement `ICreatesObservableForProperty` for property-change notification.
-- Implement `ICommandBinderImplementation` for command binding.
-
-QfStudio.Godette.ReactiveUI implements all of the above for the Godot Engine.
-
-In the current version of QfStudio.Godette.ReactiveUI, it is designed to work with ReactiveUI v23. ReactiveUI v24-beta is not supported yet at the moment.
+In the current version of QfStudio.Godette.ReactiveUI, it is designed to work with ReactiveUI v23. ReactiveUI v24 released at July 26th this year is not supported yet at the moment.
 
 ## Installation
 
@@ -37,7 +26,7 @@ TODO
 
 ## Development
 
-See [Developer.md](Developer.md).
+See [Developer.md](Docs/Developer.md).
 
 ## AI Disclosure
 

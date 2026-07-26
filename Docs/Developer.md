@@ -7,6 +7,15 @@
 
 ## ReactiveUI Integration
 
+Generally, it takes 4 steps to implement `ReactiveUI` for a custom platform.
+
+- Implement `IScheduler` for the UI thread.
+- Implement `IActivationForViewFetcher` for view activation.
+- Implement `ICreatesObservableForProperty` for property-change notification.
+- Implement `ICreatesCommandBinding` for command binding.
+
+QfStudio.Godette.ReactiveUI implements all of the above for the Godot Engine.
+
 ### Activation Semantics
 
 Activation (`true`) means the node is in the scene tree **and** ready (all children initialized). This is semantically equivalent to Avalonia's `AttachedToVisualTree` / `DetachedFromVisualTree`.
