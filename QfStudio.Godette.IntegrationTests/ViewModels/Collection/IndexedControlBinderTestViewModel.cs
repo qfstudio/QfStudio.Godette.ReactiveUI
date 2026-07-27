@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Threading.Tasks;
 using Godot;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
@@ -8,13 +9,32 @@ namespace QfStudio.Godette.IntegrationTests.ViewModels.Collection;
 
 public partial class IndexedItemViewModel : ViewModelBase
 {
-    public IndexedItemViewModel(string name) => Name = name;
+    public IndexedItemViewModel(string name)
+    {
+        Name = name;
+        Command = ReactiveCommand.CreateFromTask<string>(async param =>
+        {
+            ExecutionCount++;
+
+            GD.Print($"[PopupCmd] {Name} triggered (#{ExecutionCount}) param={param}");
+            await Task.Delay(Random.Shared.Next(5000));
+
+            LastParam = param;
+            GD.Print($"[PopupCmd] {Name} executed (#{ExecutionCount}) param={param}");
+        });
+    }
 
     [Reactive]
     public partial string Name { get; set; }
 
     [Reactive]
     public partial Texture2D? Icon { get; set; }
+
+    public ReactiveCommand<string, Unit> Command { get; }
+
+    public int ExecutionCount { get; private set; }
+
+    public string? LastParam { get; private set; }
 }
 
 public partial class IndexedControlBinderTestViewModel : ViewModelBase

@@ -8,10 +8,13 @@ using ReactiveUI;
 
 namespace QfStudio.Godette.ReactiveUI;
 
-// TODO how to support command binding for PopupMenu?
-// PopupMenu uses id to distinguish different menus when it is pressed, however that id should not be the parameter of a ViewModel command because it is a ui stuff.
-// so a native PopupMenu is not suitable target to bind commands.
-// Similar situations: OptionButton, TabBar, ItemList, Tree, FileDialog
+/// <remarks>
+/// PopupMenu is not supported by BindCommand. BindCommand is 1:1 (one control to one command)
+/// and expects a parameter-less signal; PopupMenu emits IdPressed(id) whose value is UI state,
+/// not a ViewModel concept, so it cannot serve as a command parameter without leaking UI states into the ViewModel.
+/// For per-item commands, use <see cref="PopupMenuBinder{TViewModel}"/> with a per-item CommandSelector instead.
+/// Similar situations: OptionButton, TabBar, ItemList, Tree.
+/// </remarks>
 public class GodotCommandBinder : ICreatesCommandBinding
 {
     int ICreatesCommandBinding.GetAffinityForObject<T>(bool hasEventTarget)

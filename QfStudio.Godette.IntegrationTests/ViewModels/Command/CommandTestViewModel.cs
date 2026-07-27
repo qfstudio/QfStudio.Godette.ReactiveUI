@@ -58,7 +58,7 @@ public partial class CommandTestViewModel : ViewModelBase
     public partial bool ConditionalCommandEnabled { get; set; } = false;
 
     [Reactive]
-    public partial string InputText { get; set; }
+    public partial string InputText { get; set; } = string.Empty;
 
     public IObservable<int?> InputDigits { get; }
 

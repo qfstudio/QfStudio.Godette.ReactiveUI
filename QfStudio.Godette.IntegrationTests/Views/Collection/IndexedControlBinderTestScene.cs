@@ -21,7 +21,9 @@ public partial class IndexedControlBinderTestScene : Control
 
     private readonly PopupMenuBinder<IndexedItemViewModel> _popupBinder = new(
         textSelector: vm => vm.Name,
-        iconSelector: vm => vm.Icon);
+        iconSelector: vm => vm.Icon,
+        commandSelector: vm => vm.Command,
+        commandParameterSelector: vm => vm.Name);
 
     public IndexedControlBinderTestScene()
     {
@@ -95,7 +97,19 @@ public partial class IndexedControlBinderTestScene : Control
         }
         GD.Print($"[IndexedControlTest] TabBar: {tabMatches}/{tabCount}");
 
-        var allPass = optMatches == optCount && tabMatches == tabCount;
+        // PopupMenu check
+        var popup = MenuButtonSelect.GetPopup();
+        var popupCount = Math.Min(items.Count, popup.ItemCount);
+        var popupMatches = 0;
+        for (var i = 0; i < popupCount; i++)
+        {
+            if (ReferenceEquals(_popupBinder.GetViewModelByIndex(i), items[i]))
+                popupMatches++;
+            GD.Print($"  [{i}] {items[i].Name} cmdExecuted={items[i].ExecutionCount} lastParam={items[i].LastParam}");
+        }
+        GD.Print($"[IndexedControlTest] PopupMenu: {popupMatches}/{popupCount}");
+
+        var allPass = optMatches == optCount && tabMatches == tabCount && popupMatches == popupCount;
         GD.Print($"[IndexedControlTest] Summary: {(allPass ? "PASS" : "FAIL")}");
     }
 }
