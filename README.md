@@ -375,7 +375,7 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
-// OptionButton / TabBar / PopupMenu
+// OptionButton / TabBar
 var optionBinder = new OptionButtonBinder<ItemViewModel>(textSelector: vm => vm.Name);
 this.WhenActivated(d =>
 {
@@ -386,11 +386,58 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
+// PopupMenu with commands -- each item executes its own ICommand
+var menuBinder = new PopupMenuBinder<ItemViewModel>(
+    textSelector: vm => vm.Label,
+    iconSelector: vm => vm.Icon,
+    commandSelector: vm => vm.ActionCommand,
+    commandParameterSelector: vm => vm.Parameter);
+this.WhenActivated(d =>
+{
+    menuBinder.Connect(popupMenu, menuItems)
+        .DisposeWith(d);
+    menuBinder.ObserveSelection()
+        .Subscribe(vm => { /* handle selection */ })
+        .DisposeWith(d);
+});
+
 ```
 
 `Connect(...)` returns an `IDisposable` that detaches the binder from the container and the collection. Always dispose it (typically via `DisposeWith(...)` inside `WhenActivated`) so cleanup happens on deactivation.
 
 The index binders (`ItemListBinder`, `OptionButtonBinder`, `TabBarBinder`, `PopupMenuBinder`) accept `Expression<Func<TViewModel, string?>>` / `Expression<Func<TViewModel, Texture2D?>>` selectors. When `TViewModel` implements `INotifyPropertyChanged` (e.g. inherits `ReactiveObject`), the binder subscribes via ReactiveUI's `WhenAnyValue` and keeps the control's text/icon in sync as the VM's `[Reactive]` properties change. POCO view models that do not implement `INotifyPropertyChanged` only get the initial value written at add/replace time; subsequent property changes will not propagate.
+
+<details>
+<summary>PopupMenu command binding</summary>
+
+`PopupMenuBinder` supports `ICommand` binding via two additional constructor parameters:
+
+- `commandSelector` — an `Expression<Func<TViewModel, ICommand?>>` that selects the command for each menu item.
+- `commandParameterSelector` — an optional `Expression<Func<TViewModel, object?>>` that selects the parameter passed to `CanExecute` and `Execute`.
+
+When `commandSelector` is provided, the binder:
+1. Tracks each command's `CanExecuteChanged` event and automatically calls `Container.SetItemDisabled` to reflect `CanExecute` state.
+2. Subscribes to `Container.ObserveIdPressed()` and executes the corresponding command with its parameter when a menu item is clicked.
+
+```csharp
+// ViewModel -- each menu item carries its own command
+public partial class MenuItemViewModel : ReactiveObject
+{
+    [Reactive] public partial string Label { get; set; } = "";
+    [Reactive] public partial Texture2D? Icon { get; set; }
+    public ICommand? ActionCommand { get; set; }
+    public object? Parameter { get; set; }
+}
+
+// Bind with command
+var menuBinder = new PopupMenuBinder<MenuItemViewModel>(
+    textSelector: vm => vm.Label,
+    iconSelector: vm => vm.Icon,
+    commandSelector: vm => vm.ActionCommand,
+    commandParameterSelector: vm => vm.Parameter);
+```
+
+</details>
 
 <details>
 <summary>Why a Binder instead of an <code>ItemsControl</code>?</summary>

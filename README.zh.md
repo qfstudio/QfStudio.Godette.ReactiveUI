@@ -375,7 +375,7 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
-// OptionButton / TabBar / PopupMenu
+// OptionButton / TabBar
 var optionBinder = new OptionButtonBinder<ItemViewModel>(textSelector: vm => vm.Name);
 this.WhenActivated(d =>
 {
@@ -385,11 +385,59 @@ this.WhenActivated(d =>
         .Subscribe(vm => { /* 处理选中 */ })
         .DisposeWith(d);
 });
+
+// PopupMenu 带命令绑定 -- 每个条目执行各自的 ICommand
+var menuBinder = new PopupMenuBinder<ItemViewModel>(
+    textSelector: vm => vm.Label,
+    iconSelector: vm => vm.Icon,
+    commandSelector: vm => vm.ActionCommand,
+    commandParameterSelector: vm => vm.Parameter);
+this.WhenActivated(d =>
+{
+    menuBinder.Connect(popupMenu, menuItems)
+        .DisposeWith(d);
+    menuBinder.ObserveSelection()
+        .Subscribe(vm => { /* 处理选中 */ })
+        .DisposeWith(d);
+});
+
 ```
 
 `Connect(...)` 返回一个 `IDisposable`，用于断开绑定器与容器和集合之间的连接。请务必释放它（通常在 `WhenActivated` 内通过 `DisposeWith(...)` 完成），这样才能在停用时正确清理。
 
 索引绑定器（`ItemListBinder`、`OptionButtonBinder`、`TabBarBinder`、`PopupMenuBinder`）接受 `Expression<Func<TViewModel, string?>>` / `Expression<Func<TViewModel, Texture2D?>>` 选择器。如果 `TViewModel` 实现了 `INotifyPropertyChanged`（如继承 `ReactiveObject`），绑定器会通过 ReactiveUI 的 `WhenAnyValue` 订阅变更，在 ViewModel 的 `[Reactive]` 属性变化时自动同步控件的文本或图标。未实现 `INotifyPropertyChanged` 的 POCO ViewModel 仅在添加或替换时写入初始值，后续属性变化不会传播。
+
+<details>
+<summary>PopupMenu 命令绑定</summary>
+
+`PopupMenuBinder` 支持通过两个额外的构造函数参数绑定 `ICommand`：
+
+- `commandSelector` —— `Expression<Func<TViewModel, ICommand?>>`，为每个菜单项选择对应的命令。
+- `commandParameterSelector` —— 可选的 `Expression<Func<TViewModel, object?>>`，为每个菜单项选择传递给 `CanExecute` 和 `Execute` 的参数。
+
+当提供 `commandSelector` 时，绑定器会：
+1. 追踪每个命令的 `CanExecuteChanged` 事件，自动调用 `Container.SetItemDisabled` 以反映 `CanExecute` 状态。
+2. 订阅 `Container.ObserveIdPressed()`，在菜单项被点击时执行对应的命令及其参数。
+
+```csharp
+// ViewModel -- 每个菜单项携带各自的命令
+public partial class MenuItemViewModel : ReactiveObject
+{
+    [Reactive] public partial string Label { get; set; } = "";
+    [Reactive] public partial Texture2D? Icon { get; set; }
+    public ICommand? ActionCommand { get; set; }
+    public object? Parameter { get; set; }
+}
+
+// 命令绑定
+var menuBinder = new PopupMenuBinder<MenuItemViewModel>(
+    textSelector: vm => vm.Label,
+    iconSelector: vm => vm.Icon,
+    commandSelector: vm => vm.ActionCommand,
+    commandParameterSelector: vm => vm.Parameter);
+```
+
+</details>
 
 <details>
 <summary>为什么使用 Binder 而非 <code>ItemsControl</code>？</summary>
