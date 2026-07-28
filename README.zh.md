@@ -312,7 +312,7 @@ public MyScene()
 
 ### 信号 -> Observable
 
-通过内置的扩展方法把 Godot 信号转成 `IObservable<T>`：
+本库为大部分通过信号通知变更的 Godot 控件提供了对应的 `ObserveXxx()` 扩展方法，覆盖 `BaseButton`、`Range`、`LineEdit`、`TextEdit`、`ItemList`、`OptionButton`、`TabBar`、`TabContainer`、`ColorPicker`、`ColorPickerButton`、`Tree`、`PopupMenu`、`FileDialog` 以及 `SceneTree`：
 
 ```csharp
 this.WhenActivated(d =>
@@ -328,9 +328,16 @@ this.WhenActivated(d =>
     GetTree().ObserveProcessFrame()
         .Subscribe(_ => ViewModel!.FrameCount++)
         .DisposeWith(d);
+});
+```
 
-    // 自定义信号（提供了 0...7 个类型化参数的重载；
-    // N 参数重载发出 ValueTuple<T1, ..., TN>，0 参数重载发出 Unit）
+对于任意 `GodotObject`，通过内置的扩展方法把自定义信号转成 `IObservable<T>`：
+
+```csharp
+this.WhenActivated(d =>
+{
+    // 提供了 0...7 个类型化参数的重载；
+    // N 参数重载发出 ValueTuple<T1, ..., TN>，0 参数重载发出 Unit
 
     // 0 参数信号 -> IObservable<Unit>
     MyNode.ObserveSignal("my_signal")

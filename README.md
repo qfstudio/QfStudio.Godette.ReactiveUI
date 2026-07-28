@@ -312,7 +312,7 @@ public MyScene()
 
 ### Signal -> Observable
 
-Bridge Godot signals to `IObservable<T>` with built-in extension methods:
+For most Godot controls that fire a signal to notify value or state changes, the library provides corresponding `ObserveXxx()` extension methods covering `BaseButton`, `Range`, `LineEdit`, `TextEdit`, `ItemList`, `OptionButton`, `TabBar`, `TabContainer`, `ColorPicker`, `ColorPickerButton`, `Tree`, `PopupMenu`, `FileDialog`, and `SceneTree`:
 
 ```csharp
 this.WhenActivated(d =>
@@ -328,9 +328,16 @@ this.WhenActivated(d =>
     GetTree().ObserveProcessFrame()
         .Subscribe(_ => ViewModel!.FrameCount++)
         .DisposeWith(d);
+});
+```
 
-    // Custom signals (overloads for 0...7 typed arguments;
-    // N-arg overloads emit ValueTuple<T1, ..., TN>, 0-arg emits Unit)
+For any `GodotObject`, bridge custom signals to `IObservable<T>` with built-in extension methods:
+
+```csharp
+this.WhenActivated(d =>
+{
+    // Overloads for 0...7 typed arguments;
+    // N-arg overloads emit ValueTuple<T1, ..., TN>, 0-arg emits Unit
 
     // 0-arg signal -> IObservable<Unit>
     MyNode.ObserveSignal("my_signal")
