@@ -37,6 +37,11 @@ public partial class CommandTestScene : Control
             this.BindCommand(ViewModel, vm => vm.AcceptEvenNumbersOnlyCommand, v => v.EvenNumberCommandButton,
                     this.WhenAnyValue(x => x.ViewModel!.InputDigits).Switch())
                 .DisposeWith(d);
+
+            this.Bind(ViewModel, vm => vm.LineEditSubmitEnabled, v => v.LineEditSubmitToggleCheckButton.ButtonPressed)
+                .DisposeWith(d);
+            this.BindCommand(ViewModel, vm => vm.LineEditSubmitCommand, v => v.LineEditSubmitLineEdit)
+                .DisposeWith(d);
         });
     }
 

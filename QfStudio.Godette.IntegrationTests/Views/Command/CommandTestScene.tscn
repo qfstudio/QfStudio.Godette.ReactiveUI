@@ -74,3 +74,18 @@ placeholder_text = "Input some digits..."
 unique_name_in_owner = true
 layout_mode = 2
 text = "A Command that Accepts Even Numbers Only"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="VBox" unique_id=410528211]
+layout_mode = 2
+
+[node name="LineEditSubmitLineEdit" type="LineEdit" parent="VBox/HBoxContainer4" unique_id=219702586]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "LineEdit submit (CanExecute gated) (won't trigger if previous command is still running)"
+
+[node name="LineEditSubmitToggleCheckButton" type="CheckButton" parent="VBox/HBoxContainer4" unique_id=431075219]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Enable LineEdit submit"

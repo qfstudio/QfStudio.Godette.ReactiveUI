@@ -38,6 +38,14 @@ public partial class CommandTestViewModel : ViewModelBase
         InputDigits = this.WhenAnyValue(x => x.InputText)
             .Select(text => int.TryParse(text, out var num) ? (int?)num : null);
 
+        var lineEditSubmitEnabled = this.WhenAnyValue(x => x.LineEditSubmitEnabled);
+        LineEditSubmitCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            GD.Print("[Command] LineEdit submit command triggered.");
+            await Task.Delay(Random.Shared.Next(5000));
+            GD.Print("[Command] LineEdit submit command done.");
+        }, lineEditSubmitEnabled);
+
         AcceptEvenNumbersOnlyCommand = ReactiveCommand.CreateFromTask<int>(async (num, ct) =>
         {
             await Task.Delay(200, ct);
@@ -60,9 +68,13 @@ public partial class CommandTestViewModel : ViewModelBase
     [Reactive]
     public partial string InputText { get; set; } = string.Empty;
 
+    [Reactive]
+    public partial bool LineEditSubmitEnabled { get; set; } = true;
+
     public IObservable<int?> InputDigits { get; }
 
     public ReactiveCommand<Unit, Unit> SimpleCommand { get; }
+    public ReactiveCommand<Unit, Unit> LineEditSubmitCommand { get; }
     public ReactiveCommand<Unit, Unit> AsyncCommand { get; }
     public ReactiveCommand<string, Unit> SearchCommand { get; }
 

@@ -115,10 +115,11 @@ internal static class GodotCommandBinderImpl
 
     public static IDisposable BindLineEdit(ICommand command, LineEdit lineEdit, IObservable<object?> param)
     {
-        return BindViewCore<LineEdit.TextSubmittedEventHandler, string>(command,
-            h => lineEdit.TextSubmitted += h,
-            h => lineEdit.TextSubmitted -= h,
+        var shouldFire = true;
+        var commandTrigger = lineEdit.ObserveTextSubmitted().Select(_ => Unit.Default).Where(_ => shouldFire);
+        return BindViewCore(command,
+            commandTrigger,
             param,
-            enabled => lineEdit.Editable = enabled);
+            enabled => shouldFire = enabled);
     }
 }
