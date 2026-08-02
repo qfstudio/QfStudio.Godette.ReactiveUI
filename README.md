@@ -371,6 +371,16 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
+// Custom viewModelBinder for nodes that are not IViewFor<TViewModel>
+var labelBinder = new ItemsBinder<VBoxContainer, Label, ItemViewModel>(
+    () => new Label(),
+    (label, vm) => label.Text = vm.Name);
+this.WhenActivated(d =>
+{
+    labelBinder.Connect(LabelContainer, ViewModel!.Items)
+        .DisposeWith(d);
+});
+
 // ItemList: text/icon per item
 var itemListBinder = new ItemListBinder<ItemViewModel>(textSelector: vm => vm.Name);
 this.WhenActivated(d =>

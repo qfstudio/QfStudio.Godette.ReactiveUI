@@ -11,6 +11,20 @@ public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBa
     where TNode : Godot.Node
     where TViewModel : class
 {
+    private static readonly Action<TNode, TViewModel> DefaultViewModelBinder = (node, viewModel) =>
+    {
+        if (node is IViewFor<TViewModel> view)
+        {
+            view.ViewModel = viewModel;
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                $"Node of type '{node.GetType().Name}' does not implement IViewFor<{typeof(TViewModel).Name}>. " +
+                "Pass a custom viewModelBinder to the ItemsBinder constructor to provide custom logic.");
+        }
+    };
+
     private readonly List<TNode> _nodes = [];
     private readonly Dictionary<TNode, TViewModel> _nodeToViewModel = new();
 
@@ -20,17 +34,24 @@ public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBa
     {
     }
 
-    public ItemsBinder(Func<TNode> nodeBuilder)
+    public ItemsBinder(Func<TNode> nodeBuilder) : this(nodeBuilder, null)
+    {
+    }
+
+    public ItemsBinder(Func<TNode> nodeBuilder, Action<TNode, TViewModel>? viewModelBinder)
     {
         NodeBuilder = nodeBuilder;
+        ViewModelBinder = viewModelBinder ?? DefaultViewModelBinder;
     }
 
     protected Func<TNode> NodeBuilder { get; }
 
+    protected Action<TNode, TViewModel> ViewModelBinder { get; }
+
     protected override void AddItem(int index, TViewModel viewModel)
     {
         var node = NodeBuilder();
-        ApplyViewModel(node, viewModel);
+        ViewModelBinder(node, viewModel);
 
         Container.AddChild(node);
         if (index >= 0 && index < _nodes.Count)
@@ -65,7 +86,7 @@ public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBa
 
         var node = _nodes[index];
         _nodeToViewModel[node] = newViewModel;
-        ApplyViewModel(node, newViewModel);
+        ViewModelBinder(node, newViewModel);
     }
 
     protected override void MoveItem(int oldIndex, int newIndex)
@@ -102,18 +123,4 @@ public class ItemsBinder<TContainerNode, TNode, TViewModel> : CollectionBinderBa
 
     public TViewModel? GetViewModelOfNode(TNode node) =>
         _nodeToViewModel.GetValueOrDefault(node);
-
-    protected virtual void ApplyViewModel(TNode node, TViewModel viewModel)
-    {
-        if (node is IViewFor<TViewModel> view)
-        {
-            view.ViewModel = viewModel;
-        }
-        else
-        {
-            throw new InvalidOperationException(
-                $"Node of type '{node.GetType().Name}' does not implement IViewFor<{typeof(TViewModel).Name}>. " +
-                $"Override ApplyViewModel to provide custom logic.");
-        }
-    }
 }

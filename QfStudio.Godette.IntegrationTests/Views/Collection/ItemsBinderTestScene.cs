@@ -1,4 +1,5 @@
-﻿using System.Reactive.Disposables.Fluent;
+using System.Collections.ObjectModel;
+using System.Reactive.Disposables.Fluent;
 using Godot;
 using QfStudio.Godette.IntegrationTests.ViewModels.Collection;
 using QfStudio.Godette.ReactiveUI;
@@ -65,6 +66,32 @@ public partial class ItemsBinderTestScene : Control
         BackButton.Pressed += () => GetTree().ChangeSceneToFile(HomeScene.TscnFilePath);
 
         VerifyMappingButton.Pressed += VerifyMapping;
+
+        VerifyCustomBinder();
+    }
+
+    private void VerifyCustomBinder()
+    {
+        var container = new VBoxContainer();
+        var items = new ObservableCollection<ItemViewModel>();
+        items.Add(new ItemViewModel(items) { Name = "CustomA" });
+        items.Add(new ItemViewModel(items) { Name = "CustomB" });
+        var binder = new ItemsBinder<VBoxContainer, Label, ItemViewModel>(
+            () => new Label(),
+            (label, vm) => label.Text = $"VM:{vm.Name}");
+
+        using var connection = binder.Connect(container, items);
+        var passed = container.GetChildCount() == 2
+            && container.GetChild<Label>(0).Text == "VM:CustomA"
+            && container.GetChild<Label>(1).Text == "VM:CustomB";
+
+        // ReplaceItem path must use the custom binder as well.
+        items[0] = new ItemViewModel(items) { Name = "CustomC" };
+        passed &= container.GetChild<Label>(0).Text == "VM:CustomC";
+
+        GD.Print($"[ItemsTest] Custom binder (Label.Text) check -> {(passed ? "PASS" : "FAIL")}");
+
+        container.QueueFree();
     }
 
     private void VerifyMapping()

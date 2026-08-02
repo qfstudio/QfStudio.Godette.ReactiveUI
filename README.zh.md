@@ -371,6 +371,16 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
+// 节点不实现 IViewFor<TViewModel> 时，可传入自定义 viewModelBinder
+var labelBinder = new ItemsBinder<VBoxContainer, Label, ItemViewModel>(
+    () => new Label(),
+    (label, vm) => label.Text = vm.Name);
+this.WhenActivated(d =>
+{
+    labelBinder.Connect(LabelContainer, ViewModel!.Items)
+        .DisposeWith(d);
+});
+
 // ItemList：每个条目的文本/图标
 var itemListBinder = new ItemListBinder<ItemViewModel>(textSelector: vm => vm.Name);
 this.WhenActivated(d =>
