@@ -5,3 +5,6 @@ charset = utf-8
 
 [*.csproj]
 indent_size = 2
+
+[*.{ts,mts}]
+indent_size = 2

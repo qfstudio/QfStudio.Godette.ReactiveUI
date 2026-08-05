@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": {
+        "files": [
+          "QfStudio.Godette.ReactiveUI/QfStudio.Godette.ReactiveUI.csproj"
+        ],
+        "src": "../.."
+      },
+      "dest": "_api",
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.yml",
+          "**/*.md"
+        ],
+        "src": "_api",
+        "dest": "docfx"
+      },
+      {
+        "files": [
+          "*.md",
+          "toc.yml"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "QfStudio.Godette.ReactiveUI API",
+      "_appTitle": "QfStudio.Godette.ReactiveUI API",
+      "_enableSearch": true,
+      "_disableContribution": true,
+      "favicon": "favicon.ico"
+    }
+  }
+}

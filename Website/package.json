@@ -1,0 +1,17 @@
+{
+  "name": "qfstudio-godette-reactiveui-docs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev .",
+    "build:docfx": "docfx docfx/docfx.json",
+    "build:vitepress": "vitepress build .",
+    "copy:api": "node scripts/copy-docfx-to-dist.mjs",
+    "build": "npm run build:docfx && npm run build:vitepress && npm run copy:api",
+    "preview": "vitepress preview ."
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}

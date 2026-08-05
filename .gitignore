@@ -1,4 +1,4 @@
-﻿# IDEs
+# IDEs
 .idea
 .vscode
 .trae
@@ -7,3 +7,11 @@
 bin
 obj
 *.DotSettings.user
+
+# docs site: VitePress and DocFx
+Website/node_modules/
+Website/.vitepress/dist/
+Website/.vitepress/cache/
+Website/docfx/_api/
+Website/docfx/_site/
+Website/docfx/obj/
