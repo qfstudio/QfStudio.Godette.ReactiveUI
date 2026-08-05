@@ -4,7 +4,7 @@ layout: home
 hero:
   name: QfStudio.Godette.ReactiveUI
   text: ReactiveUI for Godot Engine
-  tagline: Complete MVVM framework support for Godot 4.x
+  tagline: MVVM framework support for Godot 4.1+
   actions:
     - theme: brand
       text: Quick Start

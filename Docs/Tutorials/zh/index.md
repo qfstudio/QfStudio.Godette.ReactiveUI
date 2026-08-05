@@ -4,7 +4,7 @@ layout: home
 hero:
   name: QfStudio.Godette.ReactiveUI
   text: Godot 的 ReactiveUI 集成
-  tagline: 为 Godot 4.x 提供完整的 MVVM 框架支持
+  tagline: Godot 4.1+ 的 ReactiveUI MVVM 框架
   actions:
     - theme: brand
       text: 快速开始

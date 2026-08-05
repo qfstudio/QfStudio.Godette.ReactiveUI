@@ -1,0 +1,19 @@
+.VPHero .image {
+  display: none !important;
+}
+
+.VPHero .main {
+  max-width: 100% !important;
+}
+
+.VPHero .name {
+  font-size: clamp(28px, 4vw, 40px) !important;
+  white-space: nowrap !important;
+  display: block !important;
+}
+
+.VPHero .text {
+  font-size: clamp(18px, 2.5vw, 28px) !important;
+  white-space: nowrap !important;
+  display: block !important;
+}
