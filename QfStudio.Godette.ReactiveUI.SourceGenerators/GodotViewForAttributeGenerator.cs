@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
@@ -17,12 +18,14 @@ public sealed class GodotViewForAttributeGenerator : IIncrementalGenerator
         public readonly string? Namespace;
         public readonly string ClassName;
         public readonly string ViewModelName;
+        public readonly bool ImplementsIReactiveObject;
 
-        public TypeToGenerate(string? @namespace, string className, string viewModelName)
+        public TypeToGenerate(string? @namespace, string className, string viewModelName, bool implementsIReactiveObject)
         {
             Namespace = @namespace;
             ClassName = className;
             ViewModelName = viewModelName;
+            ImplementsIReactiveObject = implementsIReactiveObject;
         }
     }
 
@@ -43,19 +46,30 @@ public sealed class GodotViewForAttributeGenerator : IIncrementalGenerator
     {
         var namespaceBlock = string.IsNullOrEmpty(type.Namespace) ? "" : $"\nnamespace {type.Namespace};\n";
 
+        var usingComponentModel = type.ImplementsIReactiveObject ? "" : "using System.ComponentModel;\n";
+        var iroInterface = type.ImplementsIReactiveObject
+            ? ""
+            : ", global::ReactiveUI.IReactiveObject";
+
+        var iroBodyPrefix = type.ImplementsIReactiveObject
+            ? ""
+            : """
+                  public event PropertyChangedEventHandler? PropertyChanged;
+                  public event PropertyChangingEventHandler? PropertyChanging;
+                  
+                  void global::ReactiveUI.IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args) => PropertyChanged?.Invoke(this, args);
+                  void global::ReactiveUI.IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args) => PropertyChanging?.Invoke(this, args);
+              """;
+
         return $$"""
           #nullable enable
 
-          using System.ComponentModel;
+          {{usingComponentModel}}
           using ReactiveUI;
           {{namespaceBlock}}
-          public partial class {{type.ClassName}} : global::ReactiveUI.IViewFor<{{type.ViewModelName}}>, global::ReactiveUI.IActivatableView, global::ReactiveUI.IReactiveObject
+          public partial class {{type.ClassName}} : global::ReactiveUI.IViewFor<{{type.ViewModelName}}>, global::ReactiveUI.IActivatableView{{iroInterface}}
           {
-              public event PropertyChangedEventHandler? PropertyChanged;
-              public event PropertyChangingEventHandler? PropertyChanging;
-              
-              void global::ReactiveUI.IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args) => PropertyChanged?.Invoke(this, args);
-              void global::ReactiveUI.IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args) => PropertyChanging?.Invoke(this, args);
+          {{iroBodyPrefix}}
 
               private {{type.ViewModelName}}? _viewModel;
               public {{type.ViewModelName}}? ViewModel
@@ -121,8 +135,12 @@ public sealed class GodotViewForAttributeGenerator : IIncrementalGenerator
         if (classSymbol is null)
             return null;
 
+        var implementsIReactiveObject = classSymbol
+            .AllInterfaces
+            .Any(i => i.ToDisplayString() == "ReactiveUI.IReactiveObject");
+
         var @namespace = classSymbol.ContainingNamespace.ToDisplayString();
-        return new TypeToGenerate(@namespace, className, viewModelName);
+        return new TypeToGenerate(@namespace, className, viewModelName, implementsIReactiveObject);
     }
 
     private static void GenerateSource(SourceProductionContext context, TypeToGenerate? typeOrNull)
