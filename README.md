@@ -11,6 +11,7 @@ Documentation: [qfstudio.github.io/QfStudio.Godette.ReactiveUI](https://qfstudio
 ## Features
 
 - [**Data binding**](#data-binding) & [**command binding**](#command-binding) -- `this.Bind` / `this.OneWayBind` / `this.BindCommand` to Godot nodes, backed by signal-driven and per-frame-polling property binders; `CanExecute` automatically disables the target control.
+- [**Reactive view properties**](#reactive-view-properties) -- An `[Export]` Godot scene variable can be reactive.
 - [**Activation lifecycle**](#activation-lifecycle) -- `WhenActivated` driven by Godot scene-tree presence and node readiness; subscriptions cleaned up on deactivation.
 - [**Signal -> Observable**](#signal---observable) -- type-safe `ObserveXxx()` extensions for common controls plus a generic typed `ObserveSignal<T...>` bridge for custom signals.
 - [**Collection binding**](#collection-binding) -- the `ItemsBinder` family synchronizes an `ObservableCollection<T>` to Godot containers.
@@ -329,6 +330,78 @@ public MyScene()
     });
 }
 ```
+
+### Reactive View Properties
+
+The examples above observe the *ViewModel*. A node can also expose its own observable properties -- useful for reusable custom nodes that have no ViewModel of their own (e.g. an item view inside `ItemsBinder`, or a self-contained widget).
+
+Because Godot has no equivalent of WPF's `DependencyProperty` or Avalonia's `StyledProperty`, a view property becomes observable in one of two ways: it raises its own change notifications, or it is polled every frame. Making the node an `IReactiveObject` unlocks the first; engine-declared properties without its own notification signals fall back to the second automatically.
+
+```csharp
+// usings: Godot, ReactiveUI, ReactiveUI.SourceGenerators
+
+[SceneTree(root: "_root")]
+[IReactiveObject]  // from ReactiveUI.SourceGenerators -- generates the four IReactiveObject members
+public partial class CustomNode : Control, IActivatableView
+{
+    // Observable AND inspector-editable
+    [Reactive]
+    [Export]
+    public partial int ClickCount { get; set; }
+
+    public CustomNode()
+    {
+        this.WhenActivated(d =>
+        {
+            // User-declared [Reactive] property
+            this.WhenAnyValue(x => x.ClickCount)
+                .Subscribe(count => CountLabel.Text = $"ClickCount: {count}")
+                .DisposeWith(d);
+
+            // Engine-declared property
+            this.WhenAnyValue(x => x.Position)
+                .Subscribe(pos => PositionLabel.Text = $"position: {pos}")
+                .DisposeWith(d);
+        });
+    }
+
+    public override void _Ready()
+    {
+        IncrementButton.Pressed += () => ClickCount++;
+    }
+}
+```
+
+`IActivatableView` is a marker interface -- it is all `WhenActivated` needs, so a node can use the activation lifecycle without a ViewModel. Views declared with `[GodotViewFor<T>]` already implement `IReactiveObject` and `IActivatableView`, so they support `[Reactive][Export]` out of the box.
+
+One thing worth remembering: on an `IReactiveObject` or `INotifyPropertyChanged` node, a plain CLR property is silently unobservable. If you observe a user-declared property that never raises change notifications, you get the initial value and nothing more. Use `[Reactive]` or a manual `RaiseAndSetIfChanged`.
+
+<details>
+<summary>Getting <code>IReactiveObject</code> onto a node</summary>
+
+Either works and they are interchangeable:
+
+```csharp
+// 1. [IReactiveObject] attribute (ReactiveUI.SourceGenerators)
+[IReactiveObject]
+public partial class CustomNodeA : Control, IActivatableView { /* ... */ }
+```
+
+```csharp
+// 2. Hand-written
+public partial class CustomNodeB : Control, IReactiveObject, IActivatableView
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args) => PropertyChanged?.Invoke(this, args);
+    void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args) => PropertyChanging?.Invoke(this, args);
+}
+```
+
+A shared abstract base carrying `IReactiveObject` members is the third option. This comes closest to Avalonia, where a custom view inherits a framework-provided base class -- e.g. `class MyView : ReactiveUserControl<MyViewModel>`, with `IViewFor<T>` already implemented by the base. It is rarely practical in Godot, though: C# has no multiple inheritance, Godot does not support generic classes in script resources, and a view must derive from a Godot node, leaving no room to also inherit the shared abstract base. In practice, prefer one of the first two options, combined with the source generator and `[GodotViewFor<T>]`.
+
+</details>
 
 ### Signal -> Observable
 

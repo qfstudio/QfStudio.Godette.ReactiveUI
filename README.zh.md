@@ -11,6 +11,7 @@
 ## 功能特性
 
 - [**数据绑定**](#数据绑定) & [**命令绑定**](#命令绑定) -- `this.Bind` / `this.OneWayBind` / `this.BindCommand` 直接绑定 Godot 节点，底层由信号驱动与逐帧轮询两类属性绑定器支撑；`CanExecute` 会自动禁用对应控件。
+- [**响应式视图属性**](#响应式视图属性) -- 声明了 `[Export]` 的 Godot 场景变量也可以是响应式的。
 - [**激活生命周期**](#激活生命周期) -- `WhenActivated` 以节点"进入场景树且已就绪"为触发条件；视图停用时自动清理订阅。
 - [**信号 -> Observable**](#信号---observable) -- 为常用控件提供类型安全的 `ObserveXxx()` 扩展方法，也有 `ObserveSignal<T...>` 泛型桥接，可把自定义信号转成 `IObservable<T>`。
 - [**集合绑定**](#集合绑定) -- `ItemsBinder` 系列将 `ObservableCollection<T>` 同步到 Godot 容器。
@@ -329,6 +330,78 @@ public MyScene()
     });
 }
 ```
+
+### 响应式视图属性
+
+前面的示例观察的都是 *ViewModel*。节点自身也能暴露可观察属性——这对没有独立 ViewModel 的可复用自定义节点很有用（例如 `ItemsBinder` 里的条目视图，或自包含的小部件）。
+
+Godot 没有与 WPF `DependencyProperty`、Avalonia `StyledProperty` 对应的机制，视图属性要变成可观察属性，有两条路：自己发出变更通知，或每帧轮询。节点实现 `IReactiveObject` 就能开启第一种；没有内置通知信号的引擎属性，会自动退回第二种。
+
+```csharp
+// usings: Godot, ReactiveUI, ReactiveUI.SourceGenerators
+
+[SceneTree(root: "_root")]
+[IReactiveObject]  // 来自 ReactiveUI.SourceGenerators -- 生成 IReactiveObject 的四个成员
+public partial class CustomNode : Control, IActivatableView
+{
+    // 可观察，且可在 Godot 检查器中编辑
+    [Reactive]
+    [Export]
+    public partial int ClickCount { get; set; }
+
+    public CustomNode()
+    {
+        this.WhenActivated(d =>
+        {
+            // 用户声明的 [Reactive] 属性
+            this.WhenAnyValue(x => x.ClickCount)
+                .Subscribe(count => CountLabel.Text = $"ClickCount: {count}")
+                .DisposeWith(d);
+
+            // 引擎声明的属性
+            this.WhenAnyValue(x => x.Position)
+                .Subscribe(pos => PositionLabel.Text = $"position: {pos}")
+                .DisposeWith(d);
+        });
+    }
+
+    public override void _Ready()
+    {
+        IncrementButton.Pressed += () => ClickCount++;
+    }
+}
+```
+
+`IActivatableView` 是标记接口——`WhenActivated` 只需要它，因此节点无需 ViewModel 也能使用激活生命周期。用 `[GodotViewFor<T>]` 声明的视图已经实现了 `IReactiveObject` 和 `IActivatableView`，开箱即用地支持 `[Reactive][Export]`。
+
+有一点值得记住：在实现 `IReactiveObject` 或 `INotifyPropertyChanged` 的节点上，普通 CLR 属性是静默不可观察的。如果你观察一个从不发出变更通知的用户声明属性，你只会得到初始值，之后不再有任何变化。请使用 `[Reactive]`，或手写 `RaiseAndSetIfChanged`。
+
+<details>
+<summary>如何让节点实现 <code>IReactiveObject</code></summary>
+
+两种方式皆可：
+
+```csharp
+// 1. [IReactiveObject] 特性（ReactiveUI.SourceGenerators）
+[IReactiveObject]
+public partial class CustomNodeA : Control, IActivatableView { /* ... */ }
+```
+
+```csharp
+// 2. 手写实现
+public partial class CustomNodeB : Control, IReactiveObject, IActivatableView
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
+
+    void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args) => PropertyChanged?.Invoke(this, args);
+    void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args) => PropertyChanging?.Invoke(this, args);
+}
+```
+
+第三种方式是由共享抽象基类承载 `IReactiveObject` 成员。这与 Avalonia 的用法最接近——在 Avalonia 中自定义 View 继承框架提供的基类，例如 `class MyView : ReactiveUserControl<MyViewModel>`，`IViewFor<T>` 已由基类实现。不过在 Godot 中这条路并不实用：C# 不支持多重继承，Godot 也不支持在 Script 资源中使用泛型。而视图必须继承 Godot 节点，自然也就无法再继承这个共享抽象基类。实践中还是推荐采用前两种方式，配合源生成器与 `[GodotViewFor<T>]` 使用。
+
+</details>
 
 ### 信号 -> Observable
 
