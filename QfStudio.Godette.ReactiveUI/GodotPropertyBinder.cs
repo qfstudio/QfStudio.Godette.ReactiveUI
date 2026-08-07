@@ -4,24 +4,72 @@ using ReactiveUI;
 
 namespace QfStudio.Godette.ReactiveUI;
 
+/// <summary>
+/// Creates observable change notifications for built-in Godot control properties
+/// by subscribing to the corresponding Godot signals.
+/// </summary>
+/// <remarks>
+/// <para>
+/// This binder claims affinity 15 (<see cref="SignalBasedAffinity"/>). Since Godot views commonly
+/// implement <see cref="IReactiveObject"/>, a higher affinity than
+/// <see cref="IROObservableForProperty"/> (10) ensures signal-based observation wins whenever a
+/// built-in control property has a matching signal.
+/// </para>
+/// <para>
+/// The full property observation affinity chain (on a tie, the first registered binder wins):
+/// </para>
+/// <list type="table">
+/// <listheader>
+/// <term>Affinity</term>
+/// <description>Binder</description>
+/// <description>Claims</description>
+/// </listheader>
+/// <item>
+/// <term>15</term>
+/// <description><see cref="GodotPropertyBinder"/></description>
+/// <description>built-in control properties observed via their signals</description>
+/// </item>
+/// <item>
+/// <term>12</term>
+/// <description><see cref="GodotPollBasedPropertyBinder"/></description>
+/// <description>engine-declared properties (e.g. <c>Position</c>, <c>Size</c>, <c>Visible</c>) on <see cref="IReactiveObject"/>/<see cref="System.ComponentModel.INotifyPropertyChanged"/> objects, and all properties on other Godot objects</description>
+/// </item>
+/// <item>
+/// <term>10</term>
+/// <description><see cref="IROObservableForProperty"/></description>
+/// <description><see cref="IReactiveObject"/> user-declared properties (<c>[Reactive]</c> / <c>ViewModel</c>) - push</description>
+/// </item>
+/// <item>
+/// <term>5</term>
+/// <description><see cref="INPCObservableForProperty"/></description>
+/// <description><see cref="System.ComponentModel.INotifyPropertyChanged"/> types</description>
+/// </item>
+/// <item>
+/// <term>1</term>
+/// <description><see cref="POCOObservableForProperty"/></description>
+/// <description>fallback: emits the current value once</description>
+/// </item>
+/// </list>
+/// </remarks>
 public class GodotPropertyBinder : ICreatesObservableForProperty
 {
+    public const int SignalBasedAffinity = 15;
+
     public int GetAffinityForObject(Type type, string propertyName, bool beforeChanged = false)
     {
         if (beforeChanged) return 0;
 
         return propertyName switch
         {
-            nameof(Godot.Range.Value) when typeof(Godot.Range).IsAssignableFrom(type) => 10,
-            nameof(Godot.LineEdit.Text) when typeof(Godot.LineEdit).IsAssignableFrom(type) => 10,
-            nameof(Godot.TextEdit.Text) when typeof(Godot.TextEdit).IsAssignableFrom(type) => 10,
-            nameof(Godot.BaseButton.ButtonPressed) when typeof(Godot.BaseButton).IsAssignableFrom(type) => 10,
-            nameof(Godot.TabContainer.CurrentTab) when typeof(Godot.TabContainer).IsAssignableFrom(type) => 10,
-            nameof(Godot.OptionButton.Selected) when typeof(Godot.OptionButton).IsAssignableFrom(type) => 10,
-            nameof(Godot.TabBar.CurrentTab) when typeof(Godot.TabBar).IsAssignableFrom(type) => 10,
-            nameof(Godot.ColorPicker.Color) when typeof(Godot.ColorPicker).IsAssignableFrom(type) => 10,
-            nameof(Godot.ColorPickerButton.Color) when typeof(Godot.ColorPickerButton).IsAssignableFrom(type) => 10,
-
+            nameof(Godot.Range.Value) when typeof(Godot.Range).IsAssignableFrom(type) => SignalBasedAffinity,
+            nameof(Godot.LineEdit.Text) when typeof(Godot.LineEdit).IsAssignableFrom(type) => SignalBasedAffinity,
+            nameof(Godot.TextEdit.Text) when typeof(Godot.TextEdit).IsAssignableFrom(type) => SignalBasedAffinity,
+            nameof(Godot.BaseButton.ButtonPressed) when typeof(Godot.BaseButton).IsAssignableFrom(type) => SignalBasedAffinity,
+            nameof(Godot.TabContainer.CurrentTab) when typeof(Godot.TabContainer).IsAssignableFrom(type) => SignalBasedAffinity,
+            nameof(Godot.OptionButton.Selected) when typeof(Godot.OptionButton).IsAssignableFrom(type) => SignalBasedAffinity,
+            nameof(Godot.TabBar.CurrentTab) when typeof(Godot.TabBar).IsAssignableFrom(type) => SignalBasedAffinity,
+            nameof(Godot.ColorPicker.Color) when typeof(Godot.ColorPicker).IsAssignableFrom(type) => SignalBasedAffinity,
+            nameof(Godot.ColorPickerButton.Color) when typeof(Godot.ColorPickerButton).IsAssignableFrom(type) => SignalBasedAffinity,
             _ => 0
         };
     }
