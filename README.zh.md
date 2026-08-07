@@ -2,11 +2,31 @@
 
 > ReactiveUI 的 Godot 引擎集成
 
-[ReactiveUI](https://www.reactiveui.net/) 是一个面向 .NET 的跨平台 MVVM（Model-View-ViewModel）框架，以组合式风格构建。它利用响应式扩展（Reactive Extensions）将 UI 元素绑定到 ViewModel 的属性和命令，让视图和业务逻辑各司其职。
+在线文档：[qfstudio.github.io/QfStudio.Godette.ReactiveUI](https://qfstudio.github.io/QfStudio.Godette.ReactiveUI/zh/)
+
+[ReactiveUI](https://www.reactiveui.net/) 是一个面向 .NET 的可组合、跨平台 MVVM（Model-View-ViewModel）框架。它利用响应式扩展（Reactive Extensions）将 UI 元素绑定到 ViewModel 的属性和命令，让视图和业务逻辑各司其职。
 
 `QfStudio.Godette.ReactiveUI` 提供了让 ReactiveUI 在 Godot 引擎中运行所需的一套平台服务，包括调度器、视图激活、属性变更通知和命令绑定。如果你在 Avalonia 或 WPF 上用过 ReactiveUI，那么 `this.Bind` / `this.BindCommand` / `WhenActivated` 这些用法完全一样，只是底层对接的是 Godot 的节点和信号。实现细节见 [Developer.md](Docs/Developer.md)。
 
+## 功能特性
+
+- [**数据绑定**](#数据绑定) & [**命令绑定**](#命令绑定) -- `this.Bind` / `this.OneWayBind` / `this.BindCommand` 直接绑定 Godot 节点，底层由信号驱动与逐帧轮询两类属性绑定器支撑；`CanExecute` 会自动禁用对应控件。
+- [**激活生命周期**](#激活生命周期) -- `WhenActivated` 以节点"进入场景树且已就绪"为触发条件；视图停用时自动清理订阅。
+- [**信号 -> Observable**](#信号---observable) -- 为常用控件提供类型安全的 `ObserveXxx()` 扩展方法，也有 `ObserveSignal<T...>` 泛型桥接，可把自定义信号转成 `IObservable<T>`。
+- [**集合绑定**](#集合绑定) -- `ItemsBinder` 系列将 `ObservableCollection<T>` 同步到 Godot 容器。
+- [**视图定位**](#视图定位godotviewlocator) & [**路由**](#路由) -- `GodotViewLocator` 把 ViewModel 映射到 `.tscn` 场景，配合 ReactiveUI `RoutingState` 实现页面导航。
+- [**交互**](#interaction交互对话框) & [**验证**](#验证) -- 标准 ReactiveUI 的 `BindInteraction` 与 `ReactiveUI.Validation` 的 `BindValidation` 均开箱即用。
+- [**帧运算符**](#帧运算符) -- `EveryUpdate`、`DelayFrame`、`IntervalFrame`、`DebounceFrame`、`ThrottleFirstFrame`、`ChunkFrame` 与 `PollEveryUpdate`。
+- [**主线程调度**](#autoload-配置) -- `GodotMainThreadScheduler`，外加注册到 ReactiveUI 的处理帧与物理帧调度器。
+- [**源生成器**](#基本设置) -- 借助 `[GodotViewFor<T>]`，`.tscn` 根脚本即可实现 `IViewFor<T>`，无需任何样板代码。
+
 当前版本的 QfStudio.Godette.ReactiveUI 兼容 ReactiveUI v23，暂不支持今年 7 月 26 日刚发布的 ReactiveUI v24。本库尚未做零分配（zero-allocation）优化，预计未来一年内随 ReactiveUI v24 的升级一并完成减少内存分配的工作。
+
+## 前置要求
+
+- .NET 10
+- Godot 4.1+
+- ReactiveUI v23
 
 ## 安装
 
@@ -108,8 +128,8 @@ public partial class RxAppBootstrapper : Godot.Node
     public RxAppBootstrapper()
     {
         var scheduler = GodotMainThreadScheduler.Create(SynchronizationContext.Current!);
-        GodotSchedulers.MainThreadScheduler = scheduler;              
-        GodotSchedulers.ProcessFrameScheduler = _processFrameScheduler; 
+        GodotSchedulers.MainThreadScheduler = scheduler;
+        GodotSchedulers.ProcessFrameScheduler = _processFrameScheduler;
         GodotSchedulers.PhysicsFrameScheduler = _physicsFrameScheduler;
 
         var viewLocator = new GodotViewLocator();
@@ -147,13 +167,13 @@ public partial class RxAppBootstrapper : Godot.Node
 
 `RxAppBuilder.BuildApp()` 会把 `.WithMainThreadScheduler(...)` 注册的调度器同步到 ReactiveUI 的 `RxSchedulers.MainThreadScheduler`，所以下文示例里的 `ObserveOn(RxSchedulers.MainThreadScheduler)` 指的就是这里设的 `GodotMainThreadScheduler`。`GodotSchedulers` 是同一组实例在 Godot 端的别名，供帧运算符和其他 Godot 专用 API 使用。
 
-如果少了上面代码里的 `FloatToDoubleConverter` / `DoubleToFloatConverter`，在绑定暴露 `double` 属性的 Godot 控件（比如 `Range.Value`、`ColorPicker.Color`）和 ViewModel 的 `float` 属性时，绑定时会抛出 `ConverterNotFoundException`。另外本库还提供了 `EnumToStringConverter<TEnum>`、`StringToEnumConverter<TEnum>` 以及 `Variant` 与基本类型间的转换器——按需在上面的构建器里用 `.WithConverter(...)` 注册即可。
+若未注册上面的 `FloatToDoubleConverter` / `DoubleToFloatConverter`，绑定暴露 `double` 属性的 Godot 控件（如 `Range.Value`、`ColorPicker.Color`）与 ViewModel 的 `float` 属性时，会抛出 `ConverterNotFoundException`。另外本库还提供了 `EnumToStringConverter<TEnum>`、`StringToEnumConverter<TEnum>` 以及 `Variant` 与基本类型间的转换器——按需在上面的构建器里用 `.WithConverter(...)` 注册即可。
 
 ## 用法
 
 ### 核心概念
 
-**激活语义**：视图激活（`true`）的条件是它的 Godot `Node` 在场景树**且** `IsNodeReady()` 返回 `true`。`GodotActivationFetcher` 通过三条路径发出 `true`：
+**激活语义**：视图激活（`true`）的条件是它的 Godot `Node` 位于场景树中**且** `IsNodeReady()` 返回 `true`。`GodotActivationFetcher` 通过三条路径发出 `true`：
 - `Ready` 信号（首次进入场景树，所有子节点已初始化完毕）；
 - `TreeEntered` + `IsNodeReady()`（节点已就绪后重新进入）；
 - 订阅时立刻检查 `IsInsideTree() && IsNodeReady()`。
@@ -176,7 +196,7 @@ using System.Reactive.Disposables; // 用于贯穿全文的 DisposeWith(d)
 
 ### 基本设置
 
-ViewModel 需要实现 `IActivatableViewModel`。视图使用 `[GodotViewFor<T>]` 源生成器特性实现 `IViewFor<T>`。在构造函数的 `WhenActivated` 回调中进行绑定：
+你需要一个实现 `IActivatableViewModel` 的 ViewModel，以及一个用 `[GodotViewFor<T>]` 源生成器特性实现 `IViewFor<T>` 的 View。在构造函数中调用 `WhenActivated`，并在其回调内设置绑定：
 
 ```csharp
 // ViewModel
@@ -268,7 +288,7 @@ this.WhenActivated(d =>
 <details>
 <summary>工作原理</summary>
 
-两个绑定器协同工作，投递属性变更通知：
+两个绑定器协同工作，负责传递属性变更通知：
 
 **`GodotPropertyBinder`——基于信号**
 订阅 Godot 内置信号，变更即时到达，无帧延迟：
@@ -495,6 +515,8 @@ this.WhenActivated(d =>
 });
 ```
 
+`BindInteraction` 本身是标准 ReactiveUI API；上文的对话框处理逻辑属于用户代码——本库不提供对话框专用的交互辅助方法。
+
 ### 验证
 
 [ReactiveUI.Validation](https://github.com/reactiveui/ReactiveUI.Validation) 是一个独立包——需先安装：
@@ -653,6 +675,4 @@ MIT 许可证
 
 ## AI 使用声明
 
-本项目使用了 AI 辅助编码，AI 的作用仅限于提供代码建议和处理琐碎任务。
-所有代码均已尽最大努力进行人工审阅把关。
-无不妥代码入库。
+本项目仅在代码建议与琐碎任务中使用 AI 工具。所有 AI 生成的贡献均经作者审阅、测试并批准，最终代码由作者全权负责。

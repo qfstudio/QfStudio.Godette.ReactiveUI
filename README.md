@@ -8,7 +8,25 @@ Documentation: [qfstudio.github.io/QfStudio.Godette.ReactiveUI](https://qfstudio
 
 `QfStudio.Godette.ReactiveUI` provides the platform services that make ReactiveUI work with Godot Engine - scheduling, activation, property-change notification, and command binding. If you have used ReactiveUI with Avalonia or WPF, this is the same `this.Bind` / `this.BindCommand` / `WhenActivated` story, now wired to Godot nodes and signals. See [Developer.md](Docs/Developer.md) for implementation details.
 
+## Features
+
+- [**Data binding**](#data-binding) & [**command binding**](#command-binding) -- `this.Bind` / `this.OneWayBind` / `this.BindCommand` to Godot nodes, backed by signal-driven and per-frame-polling property binders; `CanExecute` automatically disables the target control.
+- [**Activation lifecycle**](#activation-lifecycle) -- `WhenActivated` driven by Godot scene-tree presence and node readiness; subscriptions cleaned up on deactivation.
+- [**Signal -> Observable**](#signal---observable) -- type-safe `ObserveXxx()` extensions for common controls plus a generic typed `ObserveSignal<T...>` bridge for custom signals.
+- [**Collection binding**](#collection-binding) -- the `ItemsBinder` family synchronizes an `ObservableCollection<T>` to Godot containers.
+- [**View location**](#view-location-godotviewlocator) & [**routing**](#routing) -- `GodotViewLocator` maps ViewModels to `.tscn` scenes and integrates with ReactiveUI `RoutingState` for navigation.
+- [**Interactions**](#interaction) & [**validation**](#validation) -- standard ReactiveUI `BindInteraction` and `ReactiveUI.Validation`'s `BindValidation` work out of the box.
+- [**Frame-aware operators**](#frame-operators) -- `EveryUpdate`, `DelayFrame`, `IntervalFrame`, `DebounceFrame`, `ThrottleFirstFrame`, `ChunkFrame`, and `PollEveryUpdate`.
+- [**Main-thread scheduling**](#autoload-setup) -- `GodotMainThreadScheduler` plus process-frame and physics-frame schedulers registered with ReactiveUI.
+- [**Source generator**](#basic-setup) -- `[GodotViewFor<T>]` implements `IViewFor<T>` for `.tscn` root scripts with no boilerplate.
+
 In the current version of QfStudio.Godette.ReactiveUI, it is designed to work with ReactiveUI v23. ReactiveUI v24 released on July 26th this year (a few hours ago at the moment of writing) is not supported yet. This library is not optimized for zero-allocation; allocation reduction work is planned within roughly the next year together with the ReactiveUI v24 upgrade.
+
+## Prerequisites
+
+- .NET 10
+- Godot 4.1+
+- ReactiveUI v23
 
 ## Installation
 
@@ -27,7 +45,7 @@ dotnet add package GodotSharp.SourceGenerators
 <details>
 <summary>With vs Without <code>[SceneTree]</code></summary>
 
-Provides the `[SceneTree]` attribute. Annotate a `.tscn` root script to get:
+Annotate a `.tscn` root script to get:
 - A `TscnFilePath` static property for type-safe scene loading.
 - Strongly-typed fields for nodes marked `unique_name_in_owner` -- no `GetNode` calls needed.
 
@@ -110,8 +128,8 @@ public partial class RxAppBootstrapper : Godot.Node
     public RxAppBootstrapper()
     {
         var scheduler = GodotMainThreadScheduler.Create(SynchronizationContext.Current!);
-        GodotSchedulers.MainThreadScheduler = scheduler;              
-        GodotSchedulers.ProcessFrameScheduler = _processFrameScheduler; 
+        GodotSchedulers.MainThreadScheduler = scheduler;
+        GodotSchedulers.ProcessFrameScheduler = _processFrameScheduler;
         GodotSchedulers.PhysicsFrameScheduler = _physicsFrameScheduler;
 
         var viewLocator = new GodotViewLocator();
@@ -178,7 +196,7 @@ using System.Reactive.Disposables; // for DisposeWith(d) used throughout
 
 ### Basic Setup
 
-A ViewModel implements `IActivatableViewModel`. A View uses the `[GodotViewFor<T>]` source generator attribute to implement `IViewFor<T>`. Bind in the constructor inside `WhenActivated`:
+You'll need a ViewModel that implements `IActivatableViewModel`, and a View that uses the `[GodotViewFor<T>]` source-generator attribute to implement `IViewFor<T>`. In the constructor, call `WhenActivated` and set up your bindings inside it:
 
 ```csharp
 // ViewModel
@@ -497,6 +515,8 @@ this.WhenActivated(d =>
 });
 ```
 
+`BindInteraction` is standard ReactiveUI; the dialog wiring above is user code -- the library ships no dialog-specific interaction helpers.
+
 ### Validation
 
 [ReactiveUI.Validation](https://github.com/reactiveui/ReactiveUI.Validation) is a separate package -- install it first:
@@ -551,7 +571,7 @@ var locator = new GodotViewLocator();
 
 // 1. Explicit, view + viewmodel types
 locator.RegisterView<MyView, MyViewModel>("res://Views/MyView.tscn");
-// or If you have GodotSharp.SourceGenerators installed
+// or if you have GodotSharp.SourceGenerators installed
 locator.RegisterView<MyView, MyViewModel>(MyView.TscnFilePath);
 
 // 2. Only the viewmodel type ( viewType inferred from the IViewFor<T> implementation )
@@ -655,6 +675,5 @@ See [Developer.md](Docs/Developer.md).
 
 ## AI Disclosure
 
-This project uses AI-assisted coding for suggestions and trivial tasks only. 
-All code is vetted with best-effort human review. 
-No dubious code is committed.
+AI tools are used only for code suggestions and trivial tasks. 
+All AI-generated contributions are reviewed, tested, and approved by the author who assumes full responsibility for the final code.
