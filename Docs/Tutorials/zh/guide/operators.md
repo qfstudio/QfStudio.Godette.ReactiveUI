@@ -1,47 +1,47 @@
-# 帧级操作符
+# 帧运算符
 
-由 `SceneTree.ProcessFrame` 驱动的帧感知响应式操作符：
+由 `SceneTree.ProcessFrame` 驱动的帧感知响应式运算符（frame operators）：
 
 ```csharp
 this.WhenActivated(d =>
 {
-    // Emit every frame (or pass RxSchedulers.PhysicsFrameScheduler for physics frame)
+    // 每帧触发（传入 RxSchedulers.PhysicsFrameScheduler 可改为物理帧）
     Observable.EveryUpdate()
-        .Subscribe(_ => { /* per-frame work */ })
+        .Subscribe(_ => { /* 每帧执行 */ })
         .DisposeWith(d);
 
-    // Delay by frames
+    // 延迟 N 帧
     Observable.AfterFrame(0)
         .DelayFrame(30)
-        .Subscribe(_ => { /* fires after 30 frames */ })
+        .Subscribe(_ => { /* 30 帧后触发 */ })
         .DisposeWith(d);
 
-    // Emit once after N frames, then every M frames (interval in frames)
+    // N 帧后触发一次，此后每 M 帧触发一次
     Observable.IntervalFrame(60)
-        .Subscribe(_ => { /* every 60 frames */ })
+        .Subscribe(_ => { /* 每 60 帧 */ })
         .DisposeWith(d);
 
-    // Emit a single value after N frames
+    // 延迟 N 帧后发出单个值
     Observable.ReturnFrame("ready", 30)
-        .Subscribe(msg => { /* fires after 30 frames */ })
+        .Subscribe(msg => { /* 30 帧后触发 */ })
         .DisposeWith(d);
 
-    // Debounce: emit after 30 frames of silence
+    // 防抖：静默 30 帧后发出
     input.DebounceFrame(30)
         .Subscribe(value => { /* ... */ })
         .DisposeWith(d);
 
-    // Throttle: emit first value per 60-frame window
+    // 节流：每个 60 帧窗口内仅发出首个值
     input.ThrottleFirstFrame(60)
         .Subscribe(value => { /* ... */ })
         .DisposeWith(d);
 
-    // Chunk: collect values and emit a list every 30 frames
+    // 分批：收集值，每 30 帧发出一个列表
     input.ChunkFrame(30)
         .Subscribe(batch => { /* IList<T> */ })
         .DisposeWith(d);
 
-    // Poll a property every frame, emit on change
+    // 每帧轮询属性，值变化时发出
     Observable.PollEveryUpdate(this, v => v.FreeIcon.Position)
         .Subscribe(pos => { /* ... */ })
         .DisposeWith(d);

@@ -26,20 +26,20 @@ this.WhenActivated(d =>
 ```csharp
 this.WhenActivated(d =>
 {
-    // Overloads for 0...7 typed arguments;
-    // N-arg overloads emit ValueTuple<T1, ..., TN>, 0-arg emits Unit
+    // 提供了 0...7 个类型化参数的重载；
+    // N 参数重载发出 ValueTuple<T1, ..., TN>，0 参数重载发出 Unit
 
-    // 0-arg signal -> IObservable<Unit>
+    // 0 参数信号 -> IObservable<Unit>
     MyNode.ObserveSignal("my_signal")
-        .Subscribe(_ => { /* fired with no payload */ })
+        .Subscribe(_ => { /* 触发时不携带数据 */ })
         .DisposeWith(d);
 
-    // 1-arg signal -> IObservable<ValueTuple<T1>>
+    // 1 参数信号 -> IObservable<ValueTuple<T1>>
     MyNode.ObserveSignal<string>("my_signal")
         .Subscribe(args => { /* args.Item1 */ })
         .DisposeWith(d);
 
-    // 3-arg signal -> IObservable<ValueTuple<T1, T2, T3>>
+    // 3 参数信号 -> IObservable<ValueTuple<T1, T2, T3>>
     MyNode.ObserveSignal<int, string, bool>("my_signal")
         .Subscribe(args => { var (i, s, b) = args; /* ... */ })
         .DisposeWith(d);

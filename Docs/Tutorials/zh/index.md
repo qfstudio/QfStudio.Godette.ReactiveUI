@@ -14,8 +14,8 @@ hero:
       link: https://qfstudio.github.io/QfStudio.Godette.ReactiveUI/docfx/
 
 features:
-  - title: 帧级 Rx 操作符
-    details: 基于 Godot 帧调度的响应式操作符，包括 DebounceFrame、ThrottleFirstFrame、EveryUpdate 等。
+  - title: 帧级 Rx 运算符
+    details: 基于 Godot 帧调度的响应式运算符，包括 DebounceFrame、ThrottleFirstFrame、EveryUpdate 等。
   - title: 控件绑定器
     details: 为 ItemList、OptionButton、Tree、TabBar、PopupMenu 等 Godot 控件提供集合数据绑定。
   - title: 属性与命令绑定

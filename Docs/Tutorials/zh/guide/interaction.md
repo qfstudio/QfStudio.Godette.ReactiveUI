@@ -1,4 +1,4 @@
-# 交互
+# Interaction
 
 将 ViewModel 的 `Interaction<TInput, TOutput>` 绑定到 View 层的处理器（例如对话框）：
 

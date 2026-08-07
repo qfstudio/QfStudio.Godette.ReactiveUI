@@ -19,7 +19,7 @@ dotnet add package GodotSharp.SourceGenerators
 - 为标记了 `unique_name_in_owner` 的节点生成强类型字段 —— 无需 `GetNode` 调用。
 
 ```csharp
-// With [SceneTree] -- nodes are directly accessible as properties
+// 使用 [SceneTree] — 节点可直接作为属性访问
 [SceneTree(root: "_root")]
 public partial class MyScene : Control
 {
@@ -32,7 +32,7 @@ public partial class MyScene : Control
 ```
 
 ```csharp
-// Without [SceneTree] -- use GetNode with string paths
+// 不使用 [SceneTree] — 需要通过字符串路径调用 GetNode
 public partial class MyScene : Control
 {
     public override void _Ready()
@@ -51,7 +51,7 @@ dotnet add package ReactiveUI.SourceGenerators
 ```
 
 ```csharp
-// With [Reactive]
+// 使用 [Reactive]
 public partial class MyViewModel : ReactiveObject
 {
     [Reactive] public partial string Name { get; set; } = "";
@@ -59,7 +59,7 @@ public partial class MyViewModel : ReactiveObject
 ```
 
 ```csharp
-// Without [Reactive] -- manual backing field + RaiseAndSetIfChanged
+// 不使用 [Reactive] — 手动编写 backing field + RaiseAndSetIfChanged
 public class MyViewModel : ReactiveObject
 {
     private string _name = "";
@@ -73,7 +73,7 @@ public class MyViewModel : ReactiveObject
 
 ## Autoload 配置
 
-创建一个 bootstrapper 类来初始化 ReactiveUI 服务，并将其在 Godot 中注册为 Autoload：
+创建一个引导类来初始化 ReactiveUI 服务，并将其在 Godot 中注册为 Autoload：
 
 ```csharp
 using System.Threading;
@@ -125,8 +125,8 @@ public partial class RxAppBootstrapper : Godot.Node
 }
 ```
 
-在 Godot 编辑器中，进入 **Project > Project Settings > Autoload**，将该脚本以 `RxAppBootstrapper` 之类的名称添加为 Autoload。
+在 Godot 编辑器中，进入 **项目 > 项目设置 > Autoload**，将该脚本以 `RxAppBootstrapper` 之类的名称添加为 Autoload。
 
-`RxAppBuilder.BuildApp()` 会将通过 `.WithMainThreadScheduler(...)` 注册的调度器同步到 ReactiveUI 的 `RxSchedulers.MainThreadScheduler`，因此 `ObserveOn(RxSchedulers.MainThreadScheduler)` 会解析为这里设置的同一个 `GodotMainThreadScheduler`。`GodotSchedulers` 是同一组实例在 Godot 侧的别名，供帧操作符及其他 Godot 专用 API 使用。
+`RxAppBuilder.BuildApp()` 会将通过 `.WithMainThreadScheduler(...)` 注册的调度器同步到 ReactiveUI 的 `RxSchedulers.MainThreadScheduler`，因此 `ObserveOn(RxSchedulers.MainThreadScheduler)` 会解析为这里设置的同一个 `GodotMainThreadScheduler`。`GodotSchedulers` 是同一组实例在 Godot 侧的别名，供帧运算符及其他 Godot 专用 API 使用。
 
 如果不加上前面所示的 `FloatToDoubleConverter`/`DoubleToFloatConverter`，那么在暴露 `double` 属性的 Godot 控件（例如 `Range.Value`、`ColorPicker.Color`）与 ViewModel 的 `float` 属性之间建立绑定时，会在绑定时抛出 `ConverterNotFoundException`。本库还附带 `EnumToStringConverter<TEnum>`、`StringToEnumConverter<TEnum>` 以及 `Variant` 与基元类型互转的转换器 —— 在上面的 builder 中通过 `.WithConverter(...)` 注册你需要的那部分即可。

@@ -5,9 +5,9 @@
 ## Node 容器
 
 ```csharp
-// ObservableCollection<ItemViewModel> -> VBoxContainer children
+// 节点容器：ObservableCollection<ItemViewModel> -> VBoxContainer 子节点
 var itemsBinder = new ItemsBinder<VBoxContainer, ItemLabel, ItemViewModel>(
-    new GodotViewLocator());  // or Splat.Locator.Current.GetService<GodotViewLocator>()! if registered
+    new GodotViewLocator());  // 若已注册，也可用 Splat.Locator.Current.GetService<GodotViewLocator>()!
 
 this.WhenActivated(d =>
 {
@@ -38,7 +38,7 @@ this.WhenActivated(d =>
     itemListBinder.Connect(itemListControl, items)
         .DisposeWith(d);
     itemListBinder.ObserveSelection()
-        .Subscribe(vm => { /* handle selection */ })
+        .Subscribe(vm => { /* 处理选中 */ })
         .DisposeWith(d);
 });
 ```
@@ -52,7 +52,7 @@ this.WhenActivated(d =>
     optionBinder.Connect(optionButton, items)
         .DisposeWith(d);
     optionBinder.ObserveSelection()
-        .Subscribe(vm => { /* handle selection */ })
+        .Subscribe(vm => { /* 处理选中 */ })
         .DisposeWith(d);
 });
 ```
@@ -70,7 +70,7 @@ this.WhenActivated(d =>
     menuBinder.Connect(popupMenu, menuItems)
         .DisposeWith(d);
     menuBinder.ObserveSelection()
-        .Subscribe(vm => { /* handle selection */ })
+        .Subscribe(vm => { /* 处理选中 */ })
         .DisposeWith(d);
 });
 ```
@@ -81,7 +81,7 @@ this.WhenActivated(d =>
 
 ## 释放
 
-`Connect(...)` 返回一个 `IDisposable`，用于将 binder 从容器和集合上解绑。请始终将其释放（通常在 `WhenActivated` 中通过 `DisposeWith(...)` 完成），以便在失活时执行清理。
+`Connect(...)` 返回一个 `IDisposable`，用于将 binder 从容器和集合上解绑。请始终将其释放（通常在 `WhenActivated` 中通过 `DisposeWith(...)` 完成），以便在停用时执行清理。
 
 ## 选择器同步
 
@@ -89,7 +89,7 @@ this.WhenActivated(d =>
 
 ## 为什么用 Binder 而不是 ItemsControl？
 
-在 Avalonia/WPF 中，集合同步内建于模板化体系：你只需绑定 `ItemsControl.ItemsSource`，框架的 `ItemContainerGenerator` 会为每个项创建容器、应用 `DataTemplate` 并接好 `DataContext`。Godot 没有 XAML/模板引擎，也没有 `ItemsSource` 属性 —— 它的 `VBoxContainer`、`ItemList`、`OptionButton`、`Tree` 等都是异构控件，增删 API 各不相同。不存在绑定层可以接入的共享"项生成器"。
+在 Avalonia/WPF 中，集合同步内建于模板化体系：你只需绑定 `ItemsControl.ItemsSource`，框架的 `ItemContainerGenerator` 会为每个项创建容器、应用 `DataTemplate` 并接好 `DataContext`。Godot 没有 XAML/模板引擎，也没有 `ItemsSource` 属性 —— 它的 `VBoxContainer`、`ItemList`、`OptionButton`、`Tree` 等都是异构控件，增删 API 各不相同。不存在绑定层可以接入的共享"条目生成器"（item generator）。
 
 `*Binder` 类型填补了这一空白。每个 binder 封装了某一 Godot 控件族专有的添加/移除/替换/移动逻辑，并对外暴露统一的 `Connect(container, collection)` API。这让视图侧代码保持声明式，同时作为 Godot 原生 API 之上的一层薄适配器。
 

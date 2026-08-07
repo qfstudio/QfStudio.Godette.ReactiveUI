@@ -5,16 +5,16 @@
 ```csharp
 this.WhenActivated(d =>
 {
-    // Button press executes the command
+    // 按钮按下时执行命令
     this.BindCommand(ViewModel, vm => vm.SaveCommand, v => v.SaveButton)
         .DisposeWith(d);
 
-    // LineEdit submits the command, passing the current text as parameter
+    // LineEdit 提交时执行命令，将当前文本作为参数传递
     this.BindCommand(ViewModel, vm => vm.SearchCommand, v => v.SearchEdit,
             vm => vm.QueryString)
         .DisposeWith(d);
 
-    // Conditional command
+    // 条件命令
     this.Bind(ViewModel, vm => vm.IsEnabled, v => v.CheckButton.ButtonPressed)
         .DisposeWith(d);
     this.BindCommand(ViewModel, vm => vm.DoWorkCommand, v => v.WorkButton)

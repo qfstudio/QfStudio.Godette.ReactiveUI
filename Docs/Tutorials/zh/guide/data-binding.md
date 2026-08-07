@@ -5,19 +5,19 @@
 ```csharp
 this.WhenActivated(d =>
 {
-    // Two-way: LineEdit.Text <-> ViewModel.Name
+    // 双向：LineEdit.Text <-> ViewModel.Name
     this.Bind(ViewModel, vm => vm.Name, v => v.NameEdit.Text)
         .DisposeWith(d);
 
-    // One-way with converter
+    // 单向 + 转换器
     this.OneWayBind(ViewModel, vm => vm.Score, v => v.ScoreLabel.Text,
             score => $"{score:F1}")
         .DisposeWith(d);
 
-    // Derived value
+    // 派生值
     this.WhenAnyValue(x => x.ViewModel!.Name, x => x.ViewModel!.Notes)
         .ObserveOn(RxSchedulers.MainThreadScheduler)
-        .Subscribe(tuple => { /* update UI */ })
+        .Subscribe(tuple => { /* 更新 UI */ })
         .DisposeWith(d);
 });
 ```
@@ -48,4 +48,4 @@ this.WhenActivated(d =>
 
 ## 类型转换器
 
-如果不加上 `FloatToDoubleConverter`/`DoubleToFloatConverter`，那么在暴露 `double` 属性的 Godot 控件（例如 `Range.Value`、`ColorPicker.Color`）与 ViewModel 的 `float` 属性之间建立绑定时，会在绑定时抛出 `ConverterNotFoundException`。本库还附带 `EnumToStringConverter<TEnum>`、`StringToEnumConverter<TEnum>` 以及 `Variant` 与基元类型互转的转换器 —— 在 Autoload bootstrapper 中通过 `.WithConverter(...)` 注册你需要的那部分即可。
+如果不加上 `FloatToDoubleConverter`/`DoubleToFloatConverter`，那么在暴露 `double` 属性的 Godot 控件（例如 `Range.Value`、`ColorPicker.Color`）与 ViewModel 的 `float` 属性之间建立绑定时，会在绑定时抛出 `ConverterNotFoundException`。本库还附带 `EnumToStringConverter<TEnum>`、`StringToEnumConverter<TEnum>` 以及 `Variant` 与基元类型互转的转换器 —— 在 Autoload 引导类中通过 `.WithConverter(...)` 注册你需要的那部分即可。

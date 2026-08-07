@@ -9,11 +9,11 @@ dotnet add package ReactiveUI.Validation
 然后在 ViewModel 上定义规则，并在 View 上绑定错误信息：
 
 ```csharp
-// usings: ReactiveUI, ReactiveUI.SourceGenerators,
-//         ReactiveUI.Validation.Abstractions, ReactiveUI.Validation.Contexts,
-//         ReactiveUI.Validation.Extensions
+// 引入：ReactiveUI, ReactiveUI.SourceGenerators,
+//       ReactiveUI.Validation.Abstractions, ReactiveUI.Validation.Contexts,
+//       ReactiveUI.Validation.Extensions
 
-// ViewModel -- implement IActivatableViewModel and IValidatableViewModel
+// ViewModel — 实现 IActivatableViewModel 和 IValidatableViewModel
 public partial class MyViewModel : ReactiveObject, IActivatableViewModel, IValidatableViewModel
 {
     public ViewModelActivator Activator { get; } = new();

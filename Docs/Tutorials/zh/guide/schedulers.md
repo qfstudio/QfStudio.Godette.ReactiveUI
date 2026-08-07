@@ -37,4 +37,4 @@ public override void _PhysicsProcess(double delta)
 }
 ```
 
-每帧调用 `NotifyProcess` 推动帧调度器执行排队的操作。`GodotSchedulers` 是这些相同实例在 Godot 侧的别名，供帧级操作符和其他 Godot 专用 API 使用。
+每帧调用 `NotifyProcess` 推动帧调度器执行排队的操作。`GodotSchedulers` 是这些相同实例在 Godot 侧的别名，供帧运算符和其他 Godot 专用 API 使用。

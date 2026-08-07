@@ -2,9 +2,9 @@
 
 ## QfStudio.Godette.ReactiveUI 是什么
 
-[ReactiveUI](https://www.reactiveui.net/) 是一个可组合、跨平台的 .NET MVVM（Model-View-ViewModel）框架。它使用响应式扩展将 UI 元素绑定到 ViewModel 的属性和命令，使视图与业务逻辑保持清晰的分离。
+[ReactiveUI](https://www.reactiveui.net/) 是一个可组合、跨平台的 .NET MVVM（Model-View-ViewModel）框架。它使用 Rx（Reactive Extensions）将 UI 元素绑定到 ViewModel 的属性和命令，使视图与业务逻辑保持清晰的分离。
 
-`QfStudio.Godette.ReactiveUI` 提供让 ReactiveUI 在 Godot Engine 上运行所需的平台服务 —— 调度、激活、属性变更通知以及命令绑定。如果你曾在 Avalonia 或 WPF 上使用过 ReactiveUI，那么这里就是同样的 `this.Bind` / `this.BindCommand` / `WhenActivated` 故事，只是接到了 Godot 的节点与信号上。
+`QfStudio.Godette.ReactiveUI` 提供让 ReactiveUI 在 Godot Engine 上运行所需的平台服务 —— 调度器、视图激活、属性变更通知以及命令绑定。如果你曾在 Avalonia 或 WPF 上使用过 ReactiveUI，那么 `this.Bind` / `this.BindCommand` / `WhenActivated` 的用法完全一样，只是底层对接的是 Godot 的节点与信号。
 
 ## 激活语义
 
@@ -25,7 +25,7 @@
 ```csharp
 using QfStudio.Godette.ReactiveUI;
 using ReactiveUI;
-using System.Reactive.Disposables; // for DisposeWith(d) used throughout
+using System.Reactive.Disposables; // 用于贯穿全文的 DisposeWith(d)
 ```
 
 `[GodotViewFor<T>]` 以及生成的 `ViewModel` 属性由本库自带的源生成器生成，位于 `QfStudio.Godette.ReactiveUI` 命名空间下 —— 无需额外的 `using` 或包引用。
@@ -42,7 +42,7 @@ public partial class MyViewModel : ReactiveObject, IActivatableViewModel
     [Reactive] public partial string Name { get; set; } = "";
 }
 
-// View (.tscn root script)
+// View（.tscn 根脚本）
 [GodotViewFor<MyViewModel>]
 public partial class MyScene : Control
 {

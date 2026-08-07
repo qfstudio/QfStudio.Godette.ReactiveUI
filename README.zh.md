@@ -4,7 +4,7 @@
 
 在线文档：[qfstudio.github.io/QfStudio.Godette.ReactiveUI](https://qfstudio.github.io/QfStudio.Godette.ReactiveUI/zh/)
 
-[ReactiveUI](https://www.reactiveui.net/) 是一个面向 .NET 的可组合、跨平台 MVVM（Model-View-ViewModel）框架。它利用响应式扩展（Reactive Extensions）将 UI 元素绑定到 ViewModel 的属性和命令，让视图和业务逻辑各司其职。
+[ReactiveUI](https://www.reactiveui.net/) 是一个面向 .NET 的可组合、跨平台 MVVM（Model-View-ViewModel）框架。它利用 Rx（Reactive Extensions）将 UI 元素绑定到 ViewModel 的属性和命令，让视图和业务逻辑各司其职。
 
 `QfStudio.Godette.ReactiveUI` 提供了让 ReactiveUI 在 Godot 引擎中运行所需的一套平台服务，包括调度器、视图激活、属性变更通知和命令绑定。如果你在 Avalonia 或 WPF 上用过 ReactiveUI，那么 `this.Bind` / `this.BindCommand` / `WhenActivated` 这些用法完全一样，只是底层对接的是 Godot 的节点和信号。实现细节见 [Developer.md](Docs/Developer.md)。
 
@@ -15,13 +15,13 @@
 - [**激活生命周期**](#激活生命周期) -- `WhenActivated` 以节点"进入场景树且已就绪"为触发条件；视图停用时自动清理订阅。
 - [**信号 -> Observable**](#信号---observable) -- 为常用控件提供类型安全的 `ObserveXxx()` 扩展方法，也有 `ObserveSignal<T...>` 泛型桥接，可把自定义信号转成 `IObservable<T>`。
 - [**集合绑定**](#集合绑定) -- `ItemsBinder` 系列将 `ObservableCollection<T>` 同步到 Godot 容器。
-- [**视图定位**](#视图定位godotviewlocator) & [**路由**](#路由) -- `GodotViewLocator` 把 ViewModel 映射到 `.tscn` 场景，配合 ReactiveUI `RoutingState` 实现页面导航。
-- [**交互**](#interaction交互对话框) & [**验证**](#验证) -- 标准 ReactiveUI 的 `BindInteraction` 与 `ReactiveUI.Validation` 的 `BindValidation` 均开箱即用。
+- [**视图定位器**](#视图定位器godotviewlocator) & [**路由**](#路由) -- `GodotViewLocator` 把 ViewModel 映射到 `.tscn` 场景，配合 ReactiveUI `RoutingState` 实现页面导航。
+- [**Interaction**](#interaction交互对话框) & [**验证**](#验证) -- 标准 ReactiveUI 的 `BindInteraction` 与 `ReactiveUI.Validation` 的 `BindValidation` 均开箱即用。
 - [**帧运算符**](#帧运算符) -- `EveryUpdate`、`DelayFrame`、`IntervalFrame`、`DebounceFrame`、`ThrottleFirstFrame`、`ChunkFrame` 与 `PollEveryUpdate`。
-- [**主线程调度**](#autoload-配置) -- `GodotMainThreadScheduler`，外加注册到 ReactiveUI 的处理帧与物理帧调度器。
+- [**主线程调度器**](#autoload-配置) -- `GodotMainThreadScheduler`，外加注册到 ReactiveUI 的处理帧与物理帧调度器。
 - [**源生成器**](#基本设置) -- 借助 `[GodotViewFor<T>]`，`.tscn` 根脚本即可实现 `IViewFor<T>`，无需任何样板代码。
 
-当前版本的 QfStudio.Godette.ReactiveUI 兼容 ReactiveUI v23，暂不支持今年 7 月 26 日刚发布的 ReactiveUI v24。本库尚未做零分配（zero-allocation）优化，预计未来一年内随 ReactiveUI v24 的升级一并完成减少内存分配的工作。
+当前版本的 QfStudio.Godette.ReactiveUI 兼容 ReactiveUI v23，暂不支持 ReactiveUI v24（2026-07-26 发布）。本库尚未做零分配（zero-allocation）优化，预计未来一年内随 ReactiveUI v24 的升级一并完成减少内存分配的工作。
 
 ## 前置要求
 
@@ -193,7 +193,7 @@ using ReactiveUI;
 using System.Reactive.Disposables; // 用于贯穿全文的 DisposeWith(d)
 ```
 
-`[GodotViewFor<T>]` 生成的 `ViewModel` 属性由本库内置的源生成器发布到 `QfStudio.Godette.ReactiveUI` 命名空间——无需额外编写 `using` 或添加包引用。
+`[GodotViewFor<T>]` 生成的 `ViewModel` 属性由本库内置的源生成器注入到 `QfStudio.Godette.ReactiveUI` 命名空间——无需额外编写 `using` 或添加包引用。
 
 ### 基本设置
 
@@ -434,7 +434,7 @@ this.WhenActivated(d =>
 
     // 0 参数信号 -> IObservable<Unit>
     MyNode.ObserveSignal("my_signal")
-        .Subscribe(_ => { /* 触发时无载荷 */ })
+        .Subscribe(_ => { /* 触发时不携带数据 */ })
         .DisposeWith(d);
 
     // 1 参数信号 -> IObservable<ValueTuple<T1>>
@@ -552,9 +552,9 @@ var menuBinder = new PopupMenuBinder<MenuItemViewModel>(
 <details>
 <summary>为什么使用 Binder 而非 <code>ItemsControl</code>？</summary>
 
-在 Avalonia/WPF 中，集合同步是模板系统自带的：绑定 `ItemsControl.ItemsSource`，框架的 `ItemContainerGenerator` 依次为每个条目创建容器、应用 `DataTemplate`、连接 `DataContext`。Godot 没有 XAML/模板引擎，也没有 `ItemsSource`——其 `VBoxContainer`、`ItemList`、`OptionButton`、`Tree` 等是异构控件，增删 API 各不相同（`AddChild`、`AddItem`、`AddItem`+`set_metadata`、`CreateItem`……），绑定层无法接入一个统一的"条目生成器"。
+在 Avalonia/WPF 中，集合同步是模板系统自带的：绑定 `ItemsControl.ItemsSource`，框架的 `ItemContainerGenerator` 依次为每个条目创建容器、应用 `DataTemplate`、连接 `DataContext`。Godot 没有 XAML/模板引擎，也没有 `ItemsSource`——其 `VBoxContainer`、`ItemList`、`OptionButton`、`Tree` 等是异构控件，增删 API 各不相同（`AddChild`、`AddItem`、`AddItem`+`set_metadata`、`CreateItem`……），绑定层无法接入一个统一的"条目生成器"（item generator）。
 
-`*Binder` 类型正是为此设计的。每个绑定器封装了一类 Godot 控件特有的增删替换逻辑，对外暴露统一的 `Connect(container, collection)` 接口。这样视图代码保持了声明式风格（与 ReactiveUI 中其他地方使用的 `WhenActivated` + `DisposeWith(d)` 一致），同时对 Godot 原生 API 仅是一层轻量适配——没有影子视觉树、没有中间"项宿主"节点、没有大开销的模板展开。代价是需要根据控件选择对应的绑定器（节点容器用 `ItemsBinder`，`ItemList` 用 `ItemListBinder`……），而非一个万能的 `ItemsControl`。
+`*Binder` 类型正是为此设计的。每个绑定器封装了一类 Godot 控件特有的增删替换逻辑，对外暴露统一的 `Connect(container, collection)` 接口。这样视图代码保持了声明式风格（与 ReactiveUI 中其他地方使用的 `WhenActivated` + `DisposeWith(d)` 一致），同时对 Godot 原生 API 仅是一层轻量适配——没有影子视觉树（shadow visual tree）、没有中间"项宿主"节点、没有大开销的模板展开。代价是需要根据控件选择对应的绑定器（节点容器用 `ItemsBinder`，`ItemList` 用 `ItemListBinder`……），而非一个万能的 `ItemsControl`。
 
 第二个原因是架构上的：Avalonia 风格的 `ItemsControl<T>` 需要继承 Godot 控件（`Godot.Node`），但 Godot 将每个派生自 `Godot.Node` 的 C# 类视为关联至项目源码目录中唯一路径的脚本资源，且**完全不支持**泛型 `Godot.Node` 类型（见 [Developer.md § Godot 限制](../Docs/Developer.md#limitations-for-godot)）。因此一个可复用的泛型集合宿主既无法放在第三方程序集中，也无法按条目类型化。绑定器规避了这两个限制——它是一个普通的泛型 C# 类，通过 `Connect(container, ...)` 驱动一个*已有的* Godot 控件，这正是它能随本库一起发布而泛型 `ItemsControl<TNode, TView, TViewModel>` 无法做到的原因。
 
@@ -631,7 +631,7 @@ this.WhenActivated(d =>
 });
 ```
 
-### 视图定位（`GodotViewLocator`）
+### 视图定位器（`GodotViewLocator`）
 
 `GodotViewLocator` 连接了 ReactiveUI 的视图解析和 Godot 的 `PackedScene` 系统。在 Avalonia 里，`IViewLocator` 通常通过 XAML `DataTemplates` 接入——绑定时平台检查 ViewModel 类型，然后实例化 XAML 里对应的 `Control`。Godot 没有和 `DataTemplate` 类似的视图解析机制，场景都是 `GD.Load<PackedScene>(path).Instantiate()` 加载的。`GodotViewLocator` 手动做了这个映射：把 ViewModel 类型注册到一个 `.tscn` 路径上，`ResolveView` 就会加载并实例化该场景作为 `IViewFor<TViewModel>`。
 

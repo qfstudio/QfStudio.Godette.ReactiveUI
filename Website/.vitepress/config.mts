@@ -119,16 +119,16 @@ export default defineConfig({
                 { text: '命令绑定', link: '/zh/guide/command-binding' },
                 { text: '集合绑定', link: '/zh/guide/collection-binding' },
                 { text: '验证', link: '/zh/guide/validation' },
-                { text: '交互', link: '/zh/guide/interaction' }
+                { text: 'Interaction', link: '/zh/guide/interaction' }
               ]
             },
             {
-              text: '响应式扩展',
+              text: 'Reactive Extensions',
               items: [
                 { text: '激活生命周期', link: '/zh/guide/activation' },
                 { text: '信号转 Observable', link: '/zh/guide/signal-observable' },
                 { text: '调度器', link: '/zh/guide/schedulers' },
-                { text: '帧级操作符', link: '/zh/guide/operators' }
+                { text: '帧运算符', link: '/zh/guide/operators' }
               ]
             },
             {
