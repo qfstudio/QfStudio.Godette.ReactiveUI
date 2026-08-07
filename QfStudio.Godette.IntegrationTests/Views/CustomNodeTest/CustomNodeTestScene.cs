@@ -1,27 +1,27 @@
 using Godot;
-using QfStudio.Godette.IntegrationTests.ViewModels.CustomControlTest;
+using QfStudio.Godette.IntegrationTests.ViewModels.CustomNodeTest;
 using QfStudio.Godette.ReactiveUI;
 
-namespace QfStudio.Godette.IntegrationTests.Views.CustomControlTest;
+namespace QfStudio.Godette.IntegrationTests.Views.CustomNodeTest;
 
 [SceneTree(root: "_root")]
-[GodotViewFor<CustomControlTestViewModel>]
-public partial class CustomControlTestScene : Control
+[GodotViewFor<CustomNodeTestViewModel>]
+public partial class CustomNodeTestScene : Control
 {
-    private static readonly PackedScene _packedScene = GD.Load<PackedScene>("res://Views/CustomControlTest/CustomControl.tscn");
-    private static readonly Script _scriptStyleA = GD.Load<Script>("res://Views/CustomControlTest/CustomControlA.cs");
-    private static readonly Script _scriptStyleB = GD.Load<Script>("res://Views/CustomControlTest/CustomControlB.cs");
+    private static readonly PackedScene _packedScene = GD.Load<PackedScene>("res://Views/CustomNodeTest/CustomNode.tscn");
+    private static readonly Script _scriptStyleA = GD.Load<Script>("res://Views/CustomNodeTest/CustomNodeA.cs");
+    private static readonly Script _scriptStyleB = GD.Load<Script>("res://Views/CustomNodeTest/CustomNodeB.cs");
 
     public override void _Ready()
     {
-        ViewModel = new CustomControlTestViewModel();
+        ViewModel = new CustomNodeTestViewModel();
 
         BackButton.Pressed += () => GetTree().ChangeSceneToFile(HomeScene.TscnFilePath);
-        AddButton.Pressed += AddCustomControl;
-        RemoveButton.Pressed += RemoveLastCustomControl;
+        AddButton.Pressed += AddCustomNode;
+        RemoveButton.Pressed += RemoveLastCustomNode;
     }
 
-    private void AddCustomControl()
+    private void AddCustomNode()
     {
         var control = _packedScene.Instantiate<Control>();
         var id = control.GetInstanceId();
@@ -37,10 +37,10 @@ public partial class CustomControlTestScene : Control
             (float)GD.RandRange(0.0, max.X),
             (float)GD.RandRange(0.0, max.Y));
 
-        GD.Print($"[CustomControlTest] Added {control.GetType().Name} at {control.Position}");
+        GD.Print($"[CustomNodeTest] Added {control.GetType().Name} at {control.Position}");
     }
 
-    private void RemoveLastCustomControl()
+    private void RemoveLastCustomNode()
     {
         var control = Container.GetChildCount() > 0 ? Container.GetChildren()[^1] : null;
         if (control is null)
@@ -49,6 +49,6 @@ public partial class CustomControlTestScene : Control
         }
 
         control.QueueFree();
-        GD.Print("[CustomControlTest] Removed last control");
+        GD.Print("[CustomNodeTest] Removed last node");
     }
 }

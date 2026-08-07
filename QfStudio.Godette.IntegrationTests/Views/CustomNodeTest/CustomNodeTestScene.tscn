@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://cgrbw8mfc3ahk"]
 
-[ext_resource type="Script" uid="uid://cfrilg42xij76" path="res://Views/CustomControlTest/CustomControlTestScene.cs" id="1_custom"]
-[ext_resource type="PackedScene" uid="uid://dl7ihc34nw6ip" path="res://Views/CustomControlTest/CustomControl.tscn" id="2_8ng7a"]
-[ext_resource type="Script" uid="uid://5ll4xoc4hij5" path="res://Views/CustomControlTest/CustomControlA.cs" id="3_3e6ee"]
-[ext_resource type="Script" uid="uid://dtmuapwm6nsvb" path="res://Views/CustomControlTest/CustomControlB.cs" id="4_we2uy"]
+[ext_resource type="Script" uid="uid://cfrilg42xij76" path="res://Views/CustomNodeTest/CustomNodeTestScene.cs" id="1_custom"]
+[ext_resource type="PackedScene" uid="uid://dl7ihc34nw6ip" path="res://Views/CustomNodeTest/CustomNode.tscn" id="2_8ng7a"]
+[ext_resource type="Script" uid="uid://5ll4xoc4hij5" path="res://Views/CustomNodeTest/CustomNodeA.cs" id="3_3e6ee"]
+[ext_resource type="Script" uid="uid://dtmuapwm6nsvb" path="res://Views/CustomNodeTest/CustomNodeB.cs" id="4_we2uy"]
 
-[node name="CustomControlTestScene" type="VBoxContainer" unique_id=1836905085]
+[node name="CustomNodeTestScene" type="VBoxContainer" unique_id=1836905085]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -21,12 +21,12 @@ text = "Back to Home"
 [node name="Title" type="Label" parent="." unique_id=518149470]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Custom Control Tests"
+text = "Custom Node Tests"
 
 [node name="InfoLabel" type="Label" parent="." unique_id=1792801893]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Add picks CustomControlA or B at random; both use [Reactive][Export]. A: [IReactiveObject] attribute, B: hand-written IRO."
+text = "Add picks CustomNodeA or B at random; both use [Reactive][Export]. A: [IReactiveObject] attribute, B: hand-written IRO."
 
 [node name="ButtonRow" type="HBoxContainer" parent="." unique_id=1272766302]
 unique_name_in_owner = true
@@ -47,7 +47,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CustomControl" parent="Container" unique_id=271445054 instance=ExtResource("2_8ng7a")]
+[node name="CustomNode" parent="Container" unique_id=271445054 instance=ExtResource("2_8ng7a")]
 layout_mode = 0
 offset_left = 392.0
 offset_top = 239.0
@@ -56,7 +56,7 @@ offset_bottom = 270.0
 script = ExtResource("3_3e6ee")
 ClickCount = 111
 
-[node name="CustomControl2" parent="Container" unique_id=1130915214 instance=ExtResource("2_8ng7a")]
+[node name="CustomNode2" parent="Container" unique_id=1130915214 instance=ExtResource("2_8ng7a")]
 layout_mode = 0
 offset_left = 160.0
 offset_top = 235.0
@@ -65,7 +65,7 @@ offset_bottom = 266.0
 script = ExtResource("4_we2uy")
 ClickCount = 222
 
-[node name="CustomControl3" parent="Container" unique_id=1234903924 instance=ExtResource("2_8ng7a")]
+[node name="CustomNode3" parent="Container" unique_id=1234903924 instance=ExtResource("2_8ng7a")]
 layout_mode = 1
 offset_left = 201.0
 offset_top = 112.0
@@ -74,7 +74,7 @@ offset_bottom = 143.0
 script = ExtResource("3_3e6ee")
 ClickCount = 333
 
-[node name="CustomControl4" parent="Container" unique_id=775017221 instance=ExtResource("2_8ng7a")]
+[node name="CustomNode4" parent="Container" unique_id=775017221 instance=ExtResource("2_8ng7a")]
 layout_mode = 1
 offset_left = 551.0
 offset_top = 114.0

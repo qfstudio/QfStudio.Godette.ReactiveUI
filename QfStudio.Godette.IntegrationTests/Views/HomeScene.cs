@@ -10,7 +10,7 @@ public partial class HomeScene : Control
         ActivationButton.Pressed += () => GetTree().ChangeSceneToFile(Activation.ActivatableHostScene.TscnFilePath);
         DataBindingButton.Pressed += () => GetTree().ChangeSceneToFile(DataBinding.DataBindingTestScene.TscnFilePath);
         CommandButton.Pressed += () => GetTree().ChangeSceneToFile(Command.CommandTestScene.TscnFilePath);
-        CustomControlTestButton.Pressed += () => GetTree().ChangeSceneToFile(CustomControlTest.CustomControlTestScene.TscnFilePath);
+        CustomNodeTestButton.Pressed += () => GetTree().ChangeSceneToFile(CustomNodeTest.CustomNodeTestScene.TscnFilePath);
         InteractionButton.Pressed += () => GetTree().ChangeSceneToFile(Interaction.InteractionTestScene.TscnFilePath);
         ObservableBridgeButton.Pressed += () => GetTree().ChangeSceneToFile(ObservableBridge.ObservableBridgeTestScene.TscnFilePath);
         RoutingButton.Pressed += () => GetTree().ChangeSceneToFile(Routing.RoutingDemoScene.TscnFilePath);

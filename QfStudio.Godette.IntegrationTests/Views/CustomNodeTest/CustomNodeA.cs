@@ -5,16 +5,18 @@ using Godot;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
-namespace QfStudio.Godette.IntegrationTests.Views.CustomControlTest;
+namespace QfStudio.Godette.IntegrationTests.Views.CustomNodeTest;
 
 /// <summary>
-/// A reusable custom control that opts into the reactive contract by hand-implementing
-/// <see cref="IReactiveObject"/> (the four members) and <see cref="IActivatableView"/>, contrasted
-/// with <see cref="CustomControlA"/> which uses the <c>[IReactiveObject]</c> attribute. Both paths
-/// satisfy <c>[Reactive][Export]</c> and engine-property polling identically.
+/// A reusable custom node with no ViewModel: it opts into the reactive contract via the
+/// <c>[IReactiveObject]</c> attribute and <see cref="IActivatableView"/>. <c>[Reactive][Export]</c>
+/// gives it an observable, inspector-editable property on a single storage. Its engine-declared
+/// <c>Position</c> is observed by frame polling and jitters each frame, clamped to the parent's
+/// bounds. Contrast with <see cref="CustomNodeB"/>, which hand-implements IReactiveObject.
 /// </summary>
-[SceneTree(root: "_root", tscnRelativeToClassPath: "CustomControl.tscn")]
-public partial class CustomControlB : Control, IReactiveObject, IActivatableView
+[IReactiveObject]
+[SceneTree(root: "_root", tscnRelativeToClassPath: "CustomNode.tscn")]
+public partial class CustomNodeA : Control, IActivatableView
 {
     private readonly RandomNumberGenerator _rng = new();
 
@@ -22,23 +24,19 @@ public partial class CustomControlB : Control, IReactiveObject, IActivatableView
     [Export]
     public partial int ClickCount { get; set; }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-    public event PropertyChangingEventHandler? PropertyChanging;
-
-    void IReactiveObject.RaisePropertyChanged(PropertyChangedEventArgs args) => PropertyChanged?.Invoke(this, args);
-    void IReactiveObject.RaisePropertyChanging(PropertyChangingEventArgs args) => PropertyChanging?.Invoke(this, args);
-
-    public CustomControlB()
+    public CustomNodeA()
     {
         this.WhenActivated(d =>
         {
-            GD.Print("[CustomControlB] Activated");
-            Disposable.Create(() => GD.Print("[CustomControlB] Deactivated")).DisposeWith(d);
+            GD.Print("[CustomNodeA] Activated");
+            Disposable.Create(() => GD.Print("[CustomNodeA] Deactivated")).DisposeWith(d);
 
+            // User-declared [Reactive] property: observed by push (IROObservableForProperty).
             this.WhenAnyValue(x => x.ClickCount)
                 .Subscribe(count => CountLabel.Text = $"ClickCount: {count}")
                 .DisposeWith(d);
 
+            // Engine-declared property: observed by frame polling (GodotPollBasedPropertyBinder).
             this.WhenAnyValue(x => x.Position)
                 .Subscribe(pos => PositionLabel.Text = $"position: ({pos.X:0.00}, {pos.Y:0.00})")
                 .DisposeWith(d);

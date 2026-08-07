@@ -53,10 +53,10 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Command Tests"
 
-[node name="CustomControlTestButton" type="Button" parent="VBox" unique_id=644924962]
+[node name="CustomNodeTestButton" type="Button" parent="VBox" unique_id=644924962]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Custom Control Tests"
+text = "Custom Node Tests"
 
 [node name="InteractionButton" type="Button" parent="VBox" unique_id=1197900635]
 unique_name_in_owner = true

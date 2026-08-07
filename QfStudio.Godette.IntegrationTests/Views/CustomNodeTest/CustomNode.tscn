@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dl7ihc34nw6ip"]
 
-[node name="CustomControlA" type="VBoxContainer" unique_id=775017221]
+[node name="CustomNode" type="VBoxContainer" unique_id=775017221]
 offset_right = 123.0
 offset_bottom = 85.0
 
