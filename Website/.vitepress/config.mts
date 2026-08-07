@@ -74,6 +74,7 @@ export default defineConfig({
               text: 'Reactive Extensions',
               items: [
                 { text: 'Activation Lifecycle', link: '/guide/activation' },
+                { text: 'Reactive View Properties', link: '/guide/reactive-view-properties' },
                 { text: 'Signal to Observable', link: '/guide/signal-observable' },
                 { text: 'Schedulers', link: '/guide/schedulers' },
                 { text: 'Frame Operators', link: '/guide/operators' }
@@ -126,6 +127,7 @@ export default defineConfig({
               text: 'Reactive Extensions',
               items: [
                 { text: '激活生命周期', link: '/zh/guide/activation' },
+                { text: '响应式视图属性', link: '/zh/guide/reactive-view-properties' },
                 { text: '信号转 Observable', link: '/zh/guide/signal-observable' },
                 { text: '调度器', link: '/zh/guide/schedulers' },
                 { text: '帧运算符', link: '/zh/guide/operators' }
