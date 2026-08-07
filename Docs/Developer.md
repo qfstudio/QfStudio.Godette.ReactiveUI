@@ -25,7 +25,7 @@ Three paths emit `true`:
 - `TreeEntered` + `IsNodeReady()` — re-entry (node was previously ready)
 - Initial check `IsInsideTree() && IsNodeReady()` — already in tree at subscription time
 
-### View Reactivity
+### Reactive View Properties
 
 A Godot view becomes reactive in one of two ways:
 
@@ -41,7 +41,7 @@ The shapes of userland view code this design supports:
 - `[Reactive][Export] public partial T Prop { get; set; }` — an observable, inspector-editable view property in one line (dedup and change notification on a single storage).
 - An observed user-declared property must raise change notifications (`[Reactive]` or a manual `RaiseAndSetIfChanged`); a plain CLR property that never raises is silently unobservable.
 - Engine-declared properties (`Position`, `Size`, `Visible`, ...) need no signal and no `[Reactive]`: frame polling observes them automatically, at most once per frame.
-- A reusable child control without a ViewModel (e.g. an item view inside `ItemsBinder`) opts into the same contract by implementing `IReactiveObject` — via the `[IReactiveObject]` attribute (`ReactiveUI.SourceGenerators`) or the four hand-written members.
+- A reusable child control without a ViewModel (e.g. an item view inside `ItemsBinder`) opts into the same contract by implementing `IReactiveObject` — via the `[IReactiveObject]` attribute (`ReactiveUI.SourceGenerators`) or the four handwritten members.
 
 #### Rationale 
 
@@ -51,13 +51,13 @@ WPF (`DependencyProperty`) and Avalonia (`StyledProperty`/`DirectProperty`) give
 
 `IReactiveObject` claims the whole view type by affinity, shadowing the polling fallback for properties that never raise notifications (on a tie, the first registered binder wins):
 
-| Affinity | Binder | Claims |
-|----------|--------|--------|
-| 15 | `GodotPropertyBinder` | built-in control properties observed via their signals |
-| 12 | `GodotPollBasedPropertyBinder` | any `GodotObject` property that needs polling — engine-declared properties (`Position`, `Size`, `Visible`) on `IReactiveObject`/`INotifyPropertyChanged` objects, and all properties on other Godot objects |
-| 10 | `IROObservableForProperty` | `IReactiveObject` user-declared properties (`[Reactive]` / `ViewModel`) — push |
-| 5 | `INPCObservableForProperty` | `INotifyPropertyChanged` types |
-| 1 | `POCOObservableForProperty` | fallback: emits the current value once |
+| Affinity | Binder                         | Claims                                                                                                                                                                                                      |
+|----------|--------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 15       | `GodotPropertyBinder`          | built-in control properties observed via their signals                                                                                                                                                      |
+| 12       | `GodotPollBasedPropertyBinder` | any `GodotObject` property that needs polling — engine-declared properties (`Position`, `Size`, `Visible`) on `IReactiveObject`/`INotifyPropertyChanged` objects, and all properties on other Godot objects |
+| 10       | `IROObservableForProperty`     | `IReactiveObject` user-declared properties (`[Reactive]` / `ViewModel`) — push                                                                                                                              |
+| 5        | `INPCObservableForProperty`    | `INotifyPropertyChanged` types                                                                                                                                                                              |
+| 1        | `POCOObservableForProperty`    | fallback: emits the current value once                                                                                                                                                                      |
 
 ## Frame-based Operator Design
 
