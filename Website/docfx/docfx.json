@@ -41,6 +41,9 @@
       "_enableSearch": true,
       "_disableContribution": true,
       "favicon": "favicon.ico"
+    },
+    "sitemap": {
+      "baseUrl": "https://qfstudio.github.io/QfStudio.Godette.ReactiveUI/docfx/"
     }
   }
 }

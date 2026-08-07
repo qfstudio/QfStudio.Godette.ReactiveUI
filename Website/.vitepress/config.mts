@@ -17,6 +17,10 @@ export default defineConfig({
     ['meta', { name: 'google-site-verification', content: '4fA6AlqB1c819hhyKGEsEqA6BQ8Et-sIbUILkaF3zpI' }]
   ],
 
+  sitemap: {
+    hostname: 'https://qfstudio.github.io/QfStudio.Godette.ReactiveUI/'
+  },
+
   // Workaround: When srcDir points outside the project root, Vite cannot resolve modules such as vue.
   // This plugin manually resolves module paths, based on a solution provided by an official VitePress maintainer.
   // https://github.com/vuejs/vitepress/issues/4612
