@@ -1,5 +1,8 @@
 # QfStudio.Godette.ReactiveUI
 
+[![NuGet Versions](https://img.shields.io/nuget/v/qfstudio.godette.reactiveui.svg?logo=nuget&style=flat&label=lastest)](https://www.nuget.org/packages/qfstudio.godette.reactiveui)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/qfstudio.godette.reactiveui.svg?logo=nuget&style=flat)](https://www.nuget.org/packages/qfstudio.godette.reactiveui)
+
 > ReactiveUI integration for Godot Engine
 
 Documentation: [qfstudio.github.io/QfStudio.Godette.ReactiveUI](https://qfstudio.github.io/QfStudio.Godette.ReactiveUI/)
