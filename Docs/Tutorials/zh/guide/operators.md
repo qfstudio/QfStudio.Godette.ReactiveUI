@@ -47,3 +47,6 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 ```
+
+> [!NOTE]
+> **`EveryUpdate` 不保证"父先于子"的调用顺序——这是刻意为之。** 与 Godot 原生 `_Process`（按树序默认父先于子）不同，`EveryUpdate` 的回调按订阅顺序执行。若要保证树序，调度器就得为每个订阅追踪其所属节点并在每帧重排工作项——为大多数订阅用不到的顺序付出每帧成本，还会把 Rx 流抽象耦合到场景树上。若逻辑确实依赖父子顺序，请在节点上覆写 `_Process`/`_PhysicsProcess`，Godot 会免费保证该顺序。
