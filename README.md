@@ -454,20 +454,16 @@ this.WhenActivated(d =>
 
 ### Collection Binding
 
-Synchronize an `ObservableCollection<TViewModel>` to a Godot container. `ItemsBinder` maps ViewModels to child nodes; `ItemListBinder`, `OptionButtonBinder`, `TabBarBinder`, and `PopupMenuBinder` bind to their respective controls.
+The library provides two families of binders: `ItemsBinder` synchronizes an `ObservableCollection<TViewModel>` to a Godot node container by creating and managing child nodes; the indexed control binders (`ItemListBinder`, `OptionButtonBinder`, `TabBarBinder`, `PopupMenuBinder`) bind to Godot's built-in item controls via their native add/remove APIs.
+
+Binders are designed as thin wrappers over Godot's native APIs and should cover the common use cases. For complex scenarios that fall outside the built-in binders' scope, you can always combine a binder with Godot's native API calls on the same control, or create your own binder by extending `CollectionBinderBase<TContainer, TViewModel>`.
+
+#### ItemsBinder (Node Tree)
+
+`ItemsBinder` maps each ViewModel to a child node inside a Godot container (e.g. `VBoxContainer`, `HBoxContainer`). The simplest usage is a custom node factory with a VM binder -- no `GodotViewLocator` required. For larger projects, you can also resolve views through `GodotViewLocator`:
 
 ```csharp
-// Node container: ObservableCollection<ItemViewModel> -> VBoxContainer children
-var itemsBinder = new ItemsBinder<VBoxContainer, ItemLabel, ItemViewModel>(
-    new GodotViewLocator());  // or Splat.Locator.Current.GetService<GodotViewLocator>()! if registered
-
-this.WhenActivated(d =>
-{
-    itemsBinder.Connect(ItemsContainer, ViewModel!.Items)
-        .DisposeWith(d);
-});
-
-// Custom viewModelBinder for nodes that are not IViewFor<TViewModel>
+// Custom node factory + VM binder -- no ViewLocator needed
 var labelBinder = new ItemsBinder<VBoxContainer, Label, ItemViewModel>(
     () => new Label(),
     (label, vm) => label.Text = vm.Name);
@@ -477,7 +473,25 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
-// ItemList: text/icon per item
+// Via view locator -- resolves .tscn scenes for each ViewModel
+var itemsBinder = new ItemsBinder<VBoxContainer, ItemLabel, ItemViewModel>(
+    new GodotViewLocator());  // or Splat.Locator.Current.GetService<GodotViewLocator>()! if registered
+
+this.WhenActivated(d =>
+{
+    itemsBinder.Connect(ItemsContainer, ViewModel!.Items)
+        .DisposeWith(d);
+});
+```
+
+#### Indexed Control Binders
+
+`ItemListBinder`, `OptionButtonBinder`, `TabBarBinder`, and `PopupMenuBinder` bind to Godot's built-in indexed controls. They accept `Expression<Func<TViewModel, string?>>` / `Expression<Func<TViewModel, Texture2D?>>` selectors and keep the control's text/icon in sync via `WhenAnyValue` when `TViewModel` implements `INotifyPropertyChanged`. POCO view models only get the initial value written at add/replace time.
+
+All four expose `ObserveSelection()` for tracking the user's selection, and share the same `Connect(control, collection)` API:
+
+```csharp
+// ItemList
 var itemListBinder = new ItemListBinder<ItemViewModel>(textSelector: vm => vm.Name);
 this.WhenActivated(d =>
 {
@@ -488,7 +502,7 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
-// OptionButton / TabBar
+// OptionButton
 var optionBinder = new OptionButtonBinder<ItemViewModel>(textSelector: vm => vm.Name);
 this.WhenActivated(d =>
 {
@@ -499,7 +513,18 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
-// PopupMenu with commands -- each item executes its own ICommand
+// TabBar
+var tabBinder = new TabBarBinder<ItemViewModel>(textSelector: vm => vm.Name);
+this.WhenActivated(d =>
+{
+    tabBinder.Connect(tabBar, items)
+        .DisposeWith(d);
+    tabBinder.ObserveSelection()
+        .Subscribe(vm => { /* handle selection */ })
+        .DisposeWith(d);
+});
+
+// PopupMenu -- with command binding, each item executes its own ICommand
 var menuBinder = new PopupMenuBinder<ItemViewModel>(
     textSelector: vm => vm.Label,
     iconSelector: vm => vm.Icon,
@@ -513,12 +538,9 @@ this.WhenActivated(d =>
         .Subscribe(vm => { /* handle selection */ })
         .DisposeWith(d);
 });
-
 ```
 
 `Connect(...)` returns an `IDisposable` that detaches the binder from the container and the collection. Always dispose it (typically via `DisposeWith(...)` inside `WhenActivated`) so cleanup happens on deactivation.
-
-The index binders (`ItemListBinder`, `OptionButtonBinder`, `TabBarBinder`, `PopupMenuBinder`) accept `Expression<Func<TViewModel, string?>>` / `Expression<Func<TViewModel, Texture2D?>>` selectors. When `TViewModel` implements `INotifyPropertyChanged` (e.g. inherits `ReactiveObject`), the binder subscribes via ReactiveUI's `WhenAnyValue` and keeps the control's text/icon in sync as the VM's `[Reactive]` properties change. POCO view models that do not implement `INotifyPropertyChanged` only get the initial value written at add/replace time; subsequent property changes will not propagate.
 
 <details>
 <summary>PopupMenu command binding</summary>
