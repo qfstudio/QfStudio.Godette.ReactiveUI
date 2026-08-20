@@ -13,11 +13,13 @@ public partial class IndexedControlBinderTestScene : Control
 {
     private readonly OptionButtonBinder<IndexedItemViewModel> _optionBinder = new(
         textSelector: vm => vm.Name,
-        iconSelector: vm => vm.Icon);
+        iconSelector: vm => vm.Icon,
+        disabledSelector: vm => vm.IsDisabled);
 
     private readonly TabBarBinder<IndexedItemViewModel> _tabBinder = new(
         textSelector: vm => vm.Name,
-        iconSelector: vm => vm.Icon);
+        iconSelector: vm => vm.Icon,
+        disabledSelector: vm => vm.IsDisabled);
 
     private readonly PopupMenuBinder<IndexedItemViewModel> _popupBinder = new(
         textSelector: vm => vm.Name,
@@ -59,17 +61,23 @@ public partial class IndexedControlBinderTestScene : Control
     {
         ViewModel = new IndexedControlBinderTestViewModel();
 
+        // Collection operations
         AddButton.Pressed += () => ViewModel.AddItemCommand.Execute().Subscribe();
         InsertInMiddleButton.Pressed += () => ViewModel.InsertInMiddleCommand.Execute().Subscribe();
         RemoveButton.Pressed += () => ViewModel.RemoveItemCommand.Execute().Subscribe();
         ClearButton.Pressed += () => ViewModel.ClearCommand.Execute().Subscribe();
         ReplaceButton.Pressed += () => ViewModel.ReplaceFirstCommand.Execute().Subscribe();
         MoveButton.Pressed += () => ViewModel.MoveCommand.Execute().Subscribe();
+
+        // Property mutations
         ChangeTextButton.Pressed += () => ViewModel.ChangeTextCommand.Execute().Subscribe();
         ChangeIconButton.Pressed += () => ViewModel.ChangeIconCommand.Execute().Subscribe();
         ChangeSelectedTextButton.Pressed += () => ViewModel.ChangeSelectedTextCommand.Execute().Subscribe();
         ChangeSelectedIconButton.Pressed += () => ViewModel.ChangeSelectedIconCommand.Execute().Subscribe();
-        ToggleEnabledButton.Pressed += () => ViewModel.ToggleEnabledCommand.Execute().Subscribe();
+        TogglePopupEnabledButton.Pressed += () => ViewModel.ToggleEnabledCommand.Execute().Subscribe();
+        ToggleDisabledButton.Pressed += () => ViewModel.ToggleTabDisabledCommand.Execute().Subscribe();
+
+        // Verification
         VerifyMappingButton.Pressed += VerifyMapping;
 
         BackButton.Pressed += () => GetTree().ChangeSceneToFile(HomeScene.TscnFilePath);
@@ -82,22 +90,34 @@ public partial class IndexedControlBinderTestScene : Control
         // OptionButton check
         var optCount = Math.Min(items.Count, OptionSelect.ItemCount);
         var optMatches = 0;
+        var optDisabledMatches = 0;
         for (var i = 0; i < optCount; i++)
         {
             if (ReferenceEquals(_optionBinder.GetViewModelByIndex(i), items[i]))
                 optMatches++;
+
+            if (OptionSelect.IsItemDisabled(i) == items[i].IsDisabled)
+                optDisabledMatches++;
+
+            GD.Print($"  [{i}] {items[i].Name} IsDisabled={items[i].IsDisabled}");
         }
-        GD.Print($"[IndexedControlTest] OptionButton: {optMatches}/{optCount}");
+        GD.Print($"[IndexedControlTest] OptionButton: {optMatches}/{optCount} disabledMatches={optDisabledMatches}/{optCount}");
 
         // TabBar check
         var tabCount = Math.Min(items.Count, TabBarSelect.TabCount);
         var tabMatches = 0;
+        var tabDisabledMatches = 0;
         for (var i = 0; i < tabCount; i++)
         {
             if (ReferenceEquals(_tabBinder.GetViewModelByIndex(i), items[i]))
                 tabMatches++;
+
+            if (TabBarSelect.IsTabDisabled(i) == items[i].IsDisabled)
+                tabDisabledMatches++;
+
+            GD.Print($"  [{i}] {items[i].Name} IsDisabled={items[i].IsDisabled}");
         }
-        GD.Print($"[IndexedControlTest] TabBar: {tabMatches}/{tabCount}");
+        GD.Print($"[IndexedControlTest] TabBar: {tabMatches}/{tabCount} disabledMatches={tabDisabledMatches}/{tabCount}");
 
         // PopupMenu check
         var popup = MenuButtonSelect.GetPopup();
@@ -118,7 +138,7 @@ public partial class IndexedControlBinderTestScene : Control
         }
         GD.Print($"[IndexedControlTest] PopupMenu: {popupMatches}/{popupCount} disabledMatches={disabledMatches}/{popupCount}");
 
-        var allPass = optMatches == optCount && tabMatches == tabCount && popupMatches == popupCount && disabledMatches == popupCount;
+        var allPass = optMatches == optCount && optDisabledMatches == optCount && tabMatches == tabCount && tabDisabledMatches == tabCount && popupMatches == popupCount && disabledMatches == popupCount;
         GD.Print($"[IndexedControlTest] Summary: {(allPass ? "PASS" : "FAIL")}");
     }
 }

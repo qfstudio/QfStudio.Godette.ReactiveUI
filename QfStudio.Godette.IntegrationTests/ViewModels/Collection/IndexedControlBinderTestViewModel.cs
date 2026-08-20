@@ -33,6 +33,9 @@ public partial class IndexedItemViewModel : ViewModelBase
     [Reactive]
     public partial bool IsEnabled { get; set; } = true;
 
+    [Reactive]
+    public partial bool IsDisabled { get; set; }
+
     public ReactiveCommand<string, Unit> Command { get; }
 
     public int ExecutionCount { get; private set; }
@@ -140,6 +143,16 @@ public partial class IndexedControlBinderTestViewModel : ViewModelBase
                 GD.Print($"[IndexedControlTest] Toggled '{first.Name}' IsEnabled={first.IsEnabled}");
             }
         });
+
+        ToggleTabDisabledCommand = ReactiveCommand.Create(() =>
+        {
+            if (Items.Count > 0)
+            {
+                var first = Items[0];
+                first.IsDisabled = !first.IsDisabled;
+                GD.Print($"[IndexedControlTest] Toggled '{first.Name}' IsDisabled={first.IsDisabled}");
+            }
+        });
     }
 
     public ObservableCollection<IndexedItemViewModel> Items { get; } = [];
@@ -158,4 +171,5 @@ public partial class IndexedControlBinderTestViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ChangeSelectedTextCommand { get; }
     public ReactiveCommand<Unit, Unit> ChangeSelectedIconCommand { get; }
     public ReactiveCommand<Unit, Unit> ToggleEnabledCommand { get; }
+    public ReactiveCommand<Unit, Unit> ToggleTabDisabledCommand { get; }
 }

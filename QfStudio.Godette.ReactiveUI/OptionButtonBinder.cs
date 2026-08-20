@@ -12,15 +12,18 @@ public class OptionButtonBinder<TViewModel> : CollectionBinderBase<OptionButton,
 {
     private readonly Expression<Func<TViewModel, string?>> _textSelector;
     private readonly Expression<Func<TViewModel, Texture2D?>>? _iconSelector;
+    private readonly Expression<Func<TViewModel, bool?>>? _disabledSelector;
 
     private readonly Dictionary<TViewModel, CompositeDisposable> _subscriptions = new();
 
     public OptionButtonBinder(
         Expression<Func<TViewModel, string?>> textSelector,
-        Expression<Func<TViewModel, Texture2D?>>? iconSelector = null)
+        Expression<Func<TViewModel, Texture2D?>>? iconSelector = null,
+        Expression<Func<TViewModel, bool?>>? disabledSelector = null)
     {
         _textSelector = textSelector;
         _iconSelector = iconSelector;
+        _disabledSelector = disabledSelector;
     }
 
     protected override void AddItem(int index, TViewModel viewModel)
@@ -80,6 +83,19 @@ public class OptionButtonBinder<TViewModel> : CollectionBinderBase<OptionButton,
                     var idx = Collection.IndexOf(vm);
                     if (idx >= 0 && idx < Container.ItemCount)
                         Container.SetItemIcon(idx, icon);
+                })
+                .DisposeWith(subscription);
+        }
+
+        if (_disabledSelector != null)
+        {
+            vm.WhenAnyValue(_disabledSelector)
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(disabled =>
+                {
+                    var idx = Collection.IndexOf(vm);
+                    if (idx >= 0 && idx < Container.ItemCount)
+                        Container.SetItemDisabled(idx, disabled ?? false);
                 })
                 .DisposeWith(subscription);
         }

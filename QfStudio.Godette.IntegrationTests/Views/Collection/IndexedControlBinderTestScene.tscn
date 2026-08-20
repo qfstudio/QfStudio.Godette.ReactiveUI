@@ -121,32 +121,41 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Move"
 
-[node name="ChangeTextButton" type="Button" parent="VBox/HBox" unique_id=1999053001]
+[node name="HBox2" type="HBoxContainer" parent="VBox" unique_id=2000111222]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ChangeTextButton" type="Button" parent="VBox/HBox2" unique_id=1999053001]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Change Text"
 
-[node name="ChangeIconButton" type="Button" parent="VBox/HBox" unique_id=1999053002]
+[node name="ChangeIconButton" type="Button" parent="VBox/HBox2" unique_id=1999053002]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Change Icon"
 
-[node name="ChangeSelectedTextButton" type="Button" parent="VBox/HBox" unique_id=1999053003]
+[node name="ChangeSelectedTextButton" type="Button" parent="VBox/HBox2" unique_id=1999053003]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Sel Text"
 
-[node name="ChangeSelectedIconButton" type="Button" parent="VBox/HBox" unique_id=1999053004]
+[node name="ChangeSelectedIconButton" type="Button" parent="VBox/HBox2" unique_id=1999053004]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Sel Icon"
 
-[node name="VerifyMappingButton" type="Button" parent="VBox/HBox" unique_id=1108968011]
+[node name="TogglePopupEnabledButton" type="Button" parent="VBox/HBox2" unique_id=1108968012]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Toggle Popup"
+
+[node name="ToggleDisabledButton" type="Button" parent="VBox/HBox2" unique_id=1108968013]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Toggle Disabled"
+
+[node name="VerifyMappingButton" type="Button" parent="VBox/HBox2" unique_id=1108968011]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Verify Mapping"
-
-[node name="ToggleEnabledButton" type="Button" parent="VBox/HBox" unique_id=1108968012]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Toggle Enabled"
