@@ -43,6 +43,8 @@ metadata/_tab_index = 0
 [node name="OptionSelect" type="OptionButton" parent="VBox/TabContainer/OptionButton" unique_id=900999494]
 unique_name_in_owner = true
 layout_mode = 2
+item_count = 1
+popup/item_0/id = 0
 
 [node name="OptionLabel" type="Label" parent="VBox/TabContainer/OptionButton" unique_id=1908824401]
 unique_name_in_owner = true
@@ -58,6 +60,8 @@ metadata/_tab_index = 1
 [node name="TabBarSelect" type="TabBar" parent="VBox/TabContainer/TabBar" unique_id=460960973]
 unique_name_in_owner = true
 layout_mode = 2
+current_tab = 0
+tab_count = 1
 
 [node name="TabLabel" type="Label" parent="VBox/TabContainer/TabBar" unique_id=208767111]
 unique_name_in_owner = true
@@ -74,6 +78,8 @@ metadata/_tab_index = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "Click to open PopupMenu"
+item_count = 1
+popup/item_0/id = 0
 
 [node name="PopupLabel" type="Label" parent="VBox/TabContainer/PopupMenu" unique_id=1880393936]
 unique_name_in_owner = true
@@ -139,3 +145,8 @@ text = "Sel Icon"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Verify Mapping"
+
+[node name="ToggleEnabledButton" type="Button" parent="VBox/HBox" unique_id=1108968012]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Toggle Enabled"

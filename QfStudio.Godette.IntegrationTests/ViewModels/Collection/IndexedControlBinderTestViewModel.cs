@@ -30,6 +30,9 @@ public partial class IndexedItemViewModel : ViewModelBase
     [Reactive]
     public partial Texture2D? Icon { get; set; }
 
+    [Reactive]
+    public partial bool IsEnabled { get; set; } = true;
+
     public ReactiveCommand<string, Unit> Command { get; }
 
     public int ExecutionCount { get; private set; }
@@ -127,6 +130,16 @@ public partial class IndexedControlBinderTestViewModel : ViewModelBase
                 SelectedItem.Icon = ImageTexture.CreateFromImage(image);
             }
         });
+
+        ToggleEnabledCommand = ReactiveCommand.Create(() =>
+        {
+            if (Items.Count > 0)
+            {
+                var first = Items[0];
+                first.IsEnabled = !first.IsEnabled;
+                GD.Print($"[IndexedControlTest] Toggled '{first.Name}' IsEnabled={first.IsEnabled}");
+            }
+        });
     }
 
     public ObservableCollection<IndexedItemViewModel> Items { get; } = [];
@@ -144,4 +157,5 @@ public partial class IndexedControlBinderTestViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ChangeIconCommand { get; }
     public ReactiveCommand<Unit, Unit> ChangeSelectedTextCommand { get; }
     public ReactiveCommand<Unit, Unit> ChangeSelectedIconCommand { get; }
+    public ReactiveCommand<Unit, Unit> ToggleEnabledCommand { get; }
 }

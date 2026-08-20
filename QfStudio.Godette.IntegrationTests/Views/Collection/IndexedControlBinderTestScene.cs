@@ -23,7 +23,8 @@ public partial class IndexedControlBinderTestScene : Control
         textSelector: vm => vm.Name,
         iconSelector: vm => vm.Icon,
         commandSelector: vm => vm.Command,
-        commandParameterSelector: vm => vm.Name);
+        commandParameterSelector: vm => vm.Name,
+        canExecuteSelector: vm => vm.IsEnabled);
 
     public IndexedControlBinderTestScene()
     {
@@ -68,6 +69,7 @@ public partial class IndexedControlBinderTestScene : Control
         ChangeIconButton.Pressed += () => ViewModel.ChangeIconCommand.Execute().Subscribe();
         ChangeSelectedTextButton.Pressed += () => ViewModel.ChangeSelectedTextCommand.Execute().Subscribe();
         ChangeSelectedIconButton.Pressed += () => ViewModel.ChangeSelectedIconCommand.Execute().Subscribe();
+        ToggleEnabledButton.Pressed += () => ViewModel.ToggleEnabledCommand.Execute().Subscribe();
         VerifyMappingButton.Pressed += VerifyMapping;
 
         BackButton.Pressed += () => GetTree().ChangeSceneToFile(HomeScene.TscnFilePath);
@@ -101,15 +103,22 @@ public partial class IndexedControlBinderTestScene : Control
         var popup = MenuButtonSelect.GetPopup();
         var popupCount = Math.Min(items.Count, popup.ItemCount);
         var popupMatches = 0;
+        var disabledMatches = 0;
         for (var i = 0; i < popupCount; i++)
         {
             if (ReferenceEquals(_popupBinder.GetViewModelByIndex(i), items[i]))
                 popupMatches++;
-            GD.Print($"  [{i}] {items[i].Name} cmdExecuted={items[i].ExecutionCount} lastParam={items[i].LastParam}");
-        }
-        GD.Print($"[IndexedControlTest] PopupMenu: {popupMatches}/{popupCount}");
 
-        var allPass = optMatches == optCount && tabMatches == tabCount && popupMatches == popupCount;
+            var expectedDisabled = !items[i].IsEnabled;
+            var actualDisabled = popup.IsItemDisabled(i);
+            if (actualDisabled == expectedDisabled)
+                disabledMatches++;
+
+            GD.Print($"  [{i}] {items[i].Name} cmdExecuted={items[i].ExecutionCount} lastParam={items[i].LastParam} IsEnabled={items[i].IsEnabled} disabled={actualDisabled}");
+        }
+        GD.Print($"[IndexedControlTest] PopupMenu: {popupMatches}/{popupCount} disabledMatches={disabledMatches}/{popupCount}");
+
+        var allPass = optMatches == optCount && tabMatches == tabCount && popupMatches == popupCount && disabledMatches == popupCount;
         GD.Print($"[IndexedControlTest] Summary: {(allPass ? "PASS" : "FAIL")}");
     }
 }

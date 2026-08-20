@@ -21,6 +21,8 @@ public class PopupMenuBinder<TViewModel> : CollectionBinderBase<PopupMenu, TView
     private readonly Func<TViewModel, ICommand?>? _commandSelectorFunc;
     private readonly Expression<Func<TViewModel, object?>>? _commandParameterSelector;
     private readonly Func<TViewModel, object?>? _commandParameterSelectorFunc;
+    private readonly Expression<Func<TViewModel, bool?>>? _canExecuteSelector;
+    private readonly Func<TViewModel, bool?>? _canExecuteSelectorFunc;
 
     private readonly Dictionary<TViewModel, CompositeDisposable> _subscriptions = new();
 
@@ -30,7 +32,8 @@ public class PopupMenuBinder<TViewModel> : CollectionBinderBase<PopupMenu, TView
         Expression<Func<TViewModel, string?>> textSelector,
         Expression<Func<TViewModel, Texture2D?>>? iconSelector = null,
         Expression<Func<TViewModel, ICommand?>>? commandSelector = null,
-        Expression<Func<TViewModel, object?>>? commandParameterSelector = null)
+        Expression<Func<TViewModel, object?>>? commandParameterSelector = null,
+        Expression<Func<TViewModel, bool?>>? canExecuteSelector = null)
     {
         _textSelector = textSelector;
         _iconSelector = iconSelector;
@@ -38,6 +41,8 @@ public class PopupMenuBinder<TViewModel> : CollectionBinderBase<PopupMenu, TView
         _commandSelectorFunc = commandSelector?.Compile();
         _commandParameterSelector = commandParameterSelector;
         _commandParameterSelectorFunc = commandParameterSelector?.Compile();
+        _canExecuteSelector = canExecuteSelector;
+        _canExecuteSelectorFunc = canExecuteSelector?.Compile();
     }
 
     protected override void AddItem(int index, TViewModel viewModel)
@@ -114,34 +119,54 @@ public class PopupMenuBinder<TViewModel> : CollectionBinderBase<PopupMenu, TView
                 .Select(t => t.Cmd == null
                     ? Observable.Return(Unit.Default)
                         .ObserveOn(RxSchedulers.MainThreadScheduler)
-                        .Do(_ => UpdateCommandEnabled(vm, null, null))
+                        .Do(_ => UpdateItemEnabled(vm))
                     : Observable.Return(Unit.Default)
                         .Concat(Observable.FromEventPattern(
                                 h => t.Cmd.CanExecuteChanged += h,
                                 h => t.Cmd.CanExecuteChanged -= h)
                             .Select(_ => Unit.Default))
                         .ObserveOn(RxSchedulers.MainThreadScheduler)
-                        .Do(_ => UpdateCommandEnabled(vm, t.Cmd, t.Param)))
+                        .Do(_ => UpdateItemEnabled(vm)))
                 .Switch()
                 .Subscribe()
                 .DisposeWith(subscription);
 
             EnsureCommandTrigger();
         }
+
+        if (_canExecuteSelector != null)
+        {
+            vm.WhenAnyValue(_canExecuteSelector)
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(_ => UpdateItemEnabled(vm))
+                .DisposeWith(subscription);
+        }
     }
 
-    private void UpdateCommandEnabled(TViewModel vm, ICommand? cmd, object? param)
+    private void UpdateItemEnabled(TViewModel vm)
     {
         var idx = Collection.IndexOf(vm);
         if (idx < 0 || idx >= Container.ItemCount)
             return;
 
-        if (cmd == null)
+        var canExecute = true;
+
+        if (_canExecuteSelectorFunc != null)
         {
-            Container.SetItemDisabled(idx, false);
-            return;
+            canExecute = _canExecuteSelectorFunc(vm) ?? true;
         }
-        Container.SetItemDisabled(idx, !cmd.CanExecute(param));
+
+        if (canExecute && _commandSelectorFunc != null)
+        {
+            var cmd = _commandSelectorFunc(vm);
+            if (cmd != null)
+            {
+                var param = _commandParameterSelectorFunc?.Invoke(vm);
+                canExecute = cmd.CanExecute(param);
+            }
+        }
+
+        Container.SetItemDisabled(idx, !canExecute);
     }
 
     private void EnsureCommandTrigger()
