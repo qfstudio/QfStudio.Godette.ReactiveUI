@@ -451,20 +451,16 @@ this.WhenActivated(d =>
 
 ### 集合绑定
 
-将 `ObservableCollection<TViewModel>` 同步到 Godot 容器。`ItemsBinder` 将 ViewModel 映射为子节点；`ItemListBinder`、`OptionButtonBinder`、`TabBarBinder` 和 `PopupMenuBinder` 分别绑定到对应的控件。
+绑定器被设计为 Godot 原生 API 的轻量封装，覆盖常见使用场景。对于超出内置绑定器能力范围的复杂场景，你可以随时组合使用绑定器与 Godot 原生 API 操作同一个控件，或继承 `CollectionBinderBase<TContainer, TViewModel>` 创建自定义绑定器。
+
+本库提供两类绑定器：`ItemsBinder` 通过创建和管理子节点，将 `ObservableCollection<TViewModel>` 同步到 Godot 节点容器；索引控件绑定器（`ItemListBinder`、`OptionButtonBinder`、`TabBarBinder`、`PopupMenuBinder`）则通过 Godot 内置控件的原生增删 API 绑定到对应控件。
+
+#### ItemsBinder（节点树）
+
+`ItemsBinder` 将每个 ViewModel 映射为 Godot 容器（如 `VBoxContainer`、`HBoxContainer`）下的一个子节点。最简单的用法是自定义节点工厂配合 VM 绑定逻辑——无需 `GodotViewLocator`。在大型项目中，也可通过 `GodotViewLocator` 解析视图：
 
 ```csharp
-// 节点容器：ObservableCollection<ItemViewModel> -> VBoxContainer 子节点
-var itemsBinder = new ItemsBinder<VBoxContainer, ItemLabel, ItemViewModel>(
-    new GodotViewLocator());  // 若已注册，也可用 Splat.Locator.Current.GetService<GodotViewLocator>()!
-
-this.WhenActivated(d =>
-{
-    itemsBinder.Connect(ItemsContainer, ViewModel!.Items)
-        .DisposeWith(d);
-});
-
-// 节点不实现 IViewFor<TViewModel> 时，可传入自定义 viewModelBinder
+// 自定义节点工厂 + VM 绑定 -- 无需 ViewLocator
 var labelBinder = new ItemsBinder<VBoxContainer, Label, ItemViewModel>(
     () => new Label(),
     (label, vm) => label.Text = vm.Name);
@@ -474,7 +470,25 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
-// ItemList：每个条目的文本/图标
+// 通过视图定位器 -- 为每个 ViewModel 解析对应的 .tscn 场景
+var itemsBinder = new ItemsBinder<VBoxContainer, ItemLabel, ItemViewModel>(
+    new GodotViewLocator());  // 若已注册，也可用 Splat.Locator.Current.GetService<GodotViewLocator>()!
+
+this.WhenActivated(d =>
+{
+    itemsBinder.Connect(ItemsContainer, ViewModel!.Items)
+        .DisposeWith(d);
+});
+```
+
+#### 索引控件绑定器
+
+`ItemListBinder`、`OptionButtonBinder`、`TabBarBinder`、`PopupMenuBinder` 绑定到 Godot 的内置索引控件。它们接受 `Expression<Func<TViewModel, string?>>` / `Expression<Func<TViewModel, Texture2D?>>` 选择器，当 `TViewModel` 实现 `INotifyPropertyChanged` 时，通过 `WhenAnyValue` 自动同步文本/图标。POCO ViewModel 仅在添加或替换时写入初始值。
+
+这四个绑定器均提供 `ObserveSelection()` 以追踪用户选中项，并共享统一的 `Connect(control, collection)` 接口：
+
+```csharp
+// ItemList
 var itemListBinder = new ItemListBinder<ItemViewModel>(textSelector: vm => vm.Name);
 this.WhenActivated(d =>
 {
@@ -485,13 +499,24 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 
-// OptionButton / TabBar
+// OptionButton
 var optionBinder = new OptionButtonBinder<ItemViewModel>(textSelector: vm => vm.Name);
 this.WhenActivated(d =>
 {
     optionBinder.Connect(optionButton, items)
         .DisposeWith(d);
     optionBinder.ObserveSelection()
+        .Subscribe(vm => { /* 处理选中 */ })
+        .DisposeWith(d);
+});
+
+// TabBar
+var tabBinder = new TabBarBinder<ItemViewModel>(textSelector: vm => vm.Name);
+this.WhenActivated(d =>
+{
+    tabBinder.Connect(tabBar, items)
+        .DisposeWith(d);
+    tabBinder.ObserveSelection()
         .Subscribe(vm => { /* 处理选中 */ })
         .DisposeWith(d);
 });
@@ -510,12 +535,9 @@ this.WhenActivated(d =>
         .Subscribe(vm => { /* 处理选中 */ })
         .DisposeWith(d);
 });
-
 ```
 
 `Connect(...)` 返回一个 `IDisposable`，用于断开绑定器与容器和集合之间的连接。请务必释放它（通常在 `WhenActivated` 内通过 `DisposeWith(...)` 完成），这样才能在停用时正确清理。
-
-索引绑定器（`ItemListBinder`、`OptionButtonBinder`、`TabBarBinder`、`PopupMenuBinder`）接受 `Expression<Func<TViewModel, string?>>` / `Expression<Func<TViewModel, Texture2D?>>` 选择器。如果 `TViewModel` 实现了 `INotifyPropertyChanged`（如继承 `ReactiveObject`），绑定器会通过 ReactiveUI 的 `WhenAnyValue` 订阅变更，在 ViewModel 的 `[Reactive]` 属性变化时自动同步控件的文本或图标。未实现 `INotifyPropertyChanged` 的 POCO ViewModel 仅在添加或替换时写入初始值，后续属性变化不会传播。
 
 <details>
 <summary>PopupMenu 命令绑定</summary>
@@ -729,6 +751,9 @@ this.WhenActivated(d =>
         .DisposeWith(d);
 });
 ```
+
+> [!NOTE]
+> **`EveryUpdate` 不保证"父先于子"的调用顺序——这是刻意为之。** 与 Godot 原生 `_Process`（按树序默认父先于子）不同，`EveryUpdate` 的回调按订阅顺序执行。若要保证树序，调度器就得为每个订阅追踪其所属节点并在每帧重排工作项——为大多数订阅用不到的顺序付出每帧成本，还会把 Rx 流抽象耦合到场景树上。若逻辑确实依赖父子顺序，请在节点上覆写 `_Process`/`_PhysicsProcess`，Godot 会保证该顺序。
 
 ## 替代方案
 
