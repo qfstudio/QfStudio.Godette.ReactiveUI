@@ -26,10 +26,10 @@ public class TabBarBinder<TViewModel> : CollectionBinderBase<TabBar, TViewModel>
     protected override void AddItem(int index, TViewModel viewModel)
     {
         Container.AddTab("", null);
-        WatchAnyValues(viewModel);
-
         if (index >= 0 && index < Container.TabCount - 1)
             Container.MoveTab(Container.TabCount - 1, index);
+
+        WatchAnyValues(viewModel);
     }
 
     protected override void RemoveItem(int index, TViewModel viewModel)

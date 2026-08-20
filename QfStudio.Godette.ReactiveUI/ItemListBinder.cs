@@ -27,10 +27,10 @@ public class ItemListBinder<TViewModel> : CollectionBinderBase<ItemList, TViewMo
     protected override void AddItem(int index, TViewModel viewModel)
     {
         Container.AddItem("", null, true);
-        WatchAnyValues(viewModel);
-
         if (index >= 0 && index < Container.ItemCount - 1)
             Container.MoveItem(Container.ItemCount - 1, index);
+
+        WatchAnyValues(viewModel);
     }
 
     protected override void RemoveItem(int index, TViewModel viewModel)
