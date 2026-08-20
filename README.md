@@ -733,6 +733,9 @@ this.WhenActivated(d =>
 });
 ```
 
+> [!NOTE]
+> **`EveryUpdate` does not guarantee parent-before-child ordering -- and this is intentional.** Unlike Godot's native `_Process`, which runs parents before children by tree order, `EveryUpdate` callbacks run in subscription order. Guaranteeing tree order would force the scheduler to track each subscription's owning node and re-sort work items every frame -- a per-frame cost for a guarantee most subscriptions never need -- and would couple the Rx stream abstraction to the scene tree. If your logic depends on parent/child ordering, override `_Process`/`_PhysicsProcess` on the nodes instead; Godot provides that ordering for free.
+
 ## Alternatives
 
 If this library isn't a fit for your needs, consider:
